@@ -1,0 +1,54 @@
+{
+  "acabf": {
+    "units": "kg m-2 s-1",
+    "standard_name": "land_ice_surface_specific_mass_balance_flux",
+    "long_name": "surface mass balance flux"
+  },
+  "mrro": {
+    "units": "kg m-2 s-1",
+    "standard_name": "land_ice_runoff_flux",
+    "long_name": "ice sheet runoff"
+  },
+  "pr": {
+    "units": "kg m-2 s-1",
+    "standard_name": "precipitation_flux",
+    "long_name": "precipitation"
+  },
+  "snowf": {
+    "units": "kg m-2 s-1",
+    "standard_name": "snowfall_flux",
+    "long_name": "snowfall"
+  },
+  "snm": {
+    "units": "kg m-2 s-1",
+    "standard_name": "surface_snow_melt_flux",
+    "long_name": "snowmelt"
+  },
+  "tas": {
+    "units": "K",
+    "standard_name": "air_temperature",
+    "long_name": "Near-Surface Air Temperature"
+  },
+  "ts": {
+    "units": "K",
+    "standard_name": "temperature_at_top_of_ice_sheet_model",
+    "long_name": "Surface Temperature",
+    "comment": "clipped tas variable after regridding <= 273.15 K"
+  },
+  "dacabfdz": {
+    "units": "kg m-2 s-1 m-1",
+    "long_name": "Surface mass balance change with surface elevation"
+  },
+  "dmrrodz": {
+    "units": "kg m-2 s-1 m-1",
+    "long_name": "Runoff change with surface elevation"
+  },
+  "dtsdz": {
+    "units": "K m-1",
+    "long_name": "Skin temperature change with surface elevation"
+  },
+  "dtasdz": {
+    "units": "K m-1",
+    "long_name": "2-m air temperature change with surface elevation"
+  }
+}

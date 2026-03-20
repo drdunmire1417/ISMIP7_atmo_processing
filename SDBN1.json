@@ -1,0 +1,58 @@
+
+{
+    "acabf": {
+      "dest_units": "kg m-2 s-1",
+      "src_units": "mmwe",
+      "src_var": "smb_rec",
+      "src_folder": "smb_rec"
+    },
+    "mrro": {
+        "dest_units": "kg m-2 s-1",
+        "src_units": "mmwe",
+        "src_var": "runoffcorr",
+        "src_folder": "runoff"
+    },
+    "pr": {
+        "dest_units": "kg m-2 s-1",
+        "src_units": "mmwe",
+        "src_var": "precipcorr",
+        "src_folder": "precip"
+    },
+    "snowf": {
+        "dest_units": "kg m-2 s-1",
+        "src_units": "mmwe",
+        "src_var": "snowfallcorr",
+        "src_folder": "snowfall"
+    },
+    "snm": {
+        "dest_units": "kg m-2 s-1",
+        "src_units": "mmwe",
+        "src_var": "snowmeltcorr",
+        "src_folder": "snowmelt"
+    },
+    "tas": {
+        "dest_units": "K",
+        "src_units": "K",
+        "src_var": "t2mcorr",
+        "src_folder": "t2m"
+    },
+    "dacabfdz": {
+        "dest_units": "kg m-2 s-1",
+        "src_units": "mmwe",
+        "src_var": "gradient",
+        "src_file": "smb_rec_reg"
+    },
+    "dmrrodz": {
+        "dest_units": "kg m-2 s-1",
+        "src_units": "mmwe",
+        "src_var": "gradient",
+        "src_file": "runoff_reg"
+    },
+    "dtsdz": {
+        "dest_units": "K",
+        "src_units": "K",
+        "src_var": "gradient",
+        "src_file": "t2n_reg"
+    }
+  }
+
