@@ -74,12 +74,15 @@ class DataRegridder:
         out_file = f'{self.dest_var}_{self.config.icesheet}_{self.config.gcm}_{self.config.scenario}_{self.config.method}_v{self.config.version}_{year}.nc'
         output_path = os.path.join(self.out_dir, out_file)
         if os.path.exists(output_path): print(f'Skipping {output_path}... already exists')
+        #print(self.config.src_mask)
         else:
             ds_src = ds_src[[self.src_var]]
-            if self.dest_var == 'tas': ds_src = ds_src.where((ds_src.t2mcorr>220)&(ds_src.t2mcorr<285))
-            ds_src = fill_nearest_2d(ds_src, self.src_var)
-            if self.dest_var == 'tas': ds_out = ds_src.interp_like(self.target_grid, method="linear")
-            else:
+            if self.dest_var == 'tas': 
+                ds_src = fill_nearest_2d_only(ds_src, self.src_var, self.config.src_mask, mask_temp = True)
+                ds_out = ds_src.interp_like(self.target_grid, method="linear")
+
+            else: 
+                ds_src = fill_nearest_2d_only(ds_src, self.src_var, self.config.src_mask)
                 ds_src_bounded = add_coords(ds_src, self.config.src_epsg)
                 if self.regridder_obj is None:
                     self.regridder_obj = make_regridder(ds_src_bounded, self.target_grid, self.config.regrid_scheme, True, self.config.weights_path, self.periodic)
@@ -177,7 +180,7 @@ class DataRegridder:
                 end_idx = (chunk_end - syear) + 1
                 ds_chunk = ds_full.isel(time=slice(start_idx, end_idx))
                 ds_chunk = ds_chunk[[self.config.gradient_src_var]]
-                ds_chunk = fill_nearest_2d(ds_chunk, self.config.gradient_src_var)
+                ds_chunk = fill_nearest_2d_only(ds_chunk, self.config.gradient_src_var, self.config.src_mask)
 
                 print('here')
                 ds_out = ds_chunk.interp_like(self.target_grid, method="linear")
@@ -227,7 +230,7 @@ def regrid_CMIP(self):
                 end_idx = (chunk_end - syear) + 1
                 ds_chunk = ds_full.isel(time=slice(start_idx, end_idx))
                 ds_chunk = ds_chunk[[self.config.gradient_src_var]]
-                ds_chunk = fill_nearest_2d(ds_chunk, self.config.gradient_src_var)
+                ds_chunk = fill_nearest_2d_only(ds_chunk, self.config.gradient_src_var, self.config.src_mask)
 
                 print('here')
                 ds_out = ds_chunk.interp_like(self.target_grid, method="linear")

@@ -16,6 +16,7 @@ class RegridConfig:
     gcm: str
     scenario: str
     method: str
+    src_mask: str
 
     out_dir: str
     scratch_dir: str
@@ -66,6 +67,7 @@ def read_config_file():
 
     weights_path = f'{weights_dir}{icesheet}_{method}_{res}_weights.nc'
     masks_path = f'{masks_dir}{icesheet}_mask_ISMIP_{res}.nc'
+    src_mask = f'{masks_dir}{icesheet}_mask_{method}.nc'
 
     # Return the populated Dataclass object directly
     return RegridConfig(
@@ -81,6 +83,7 @@ def read_config_file():
         gcm=gcm,
         scenario=scenario,
         method=method,
+        src_mask = src_mask,
 
         out_dir=out_dir,
         scratch_dir=scratch_dir,

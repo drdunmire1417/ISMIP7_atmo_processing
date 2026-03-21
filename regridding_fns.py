@@ -11,15 +11,24 @@ import netCDF4
 
 FILL_VALUE = netCDF4.default_fillvals['f4']
 
-def fill_nearest_2d(ds, var):
-    """Fills NaNs in a DataArray using 2D nearest neighbor."""
-    ds = ds.where(ds[var]!=0)
-    da = ds[var]
+def fill_nearest_2d_only(ds, var, mask_file, mask_temp = False):
+    mask = xr.open_dataset(mask_file)
+    da = ds[var].where(mask.mask != 0)
+    if mask_temp: da = da.where((da>220)&(da<285))
     data = da.values
-    mask = np.isnan(data)
-    ind = ndimage.distance_transform_edt(mask, return_distances=False, return_indices=True)
-    filled_data = data[tuple(ind)]
-    ds[var] = da.copy(data=filled_data)
+    
+    # Loop through each time step (index 0)
+    for t in range(data.shape[0]):
+        slice_2d = data[t, :, :]
+        mask = np.isnan(slice_2d)
+        
+        # Only fill if there are NaNs and at least one valid value
+        if np.any(mask) and not np.all(mask):
+            ind = ndimage.distance_transform_edt(mask, return_indices=True, return_distances=False)
+            data[t, :, :] = slice_2d[tuple(ind)]
+            
+    ds[var] = da.copy(data=data)
+    print(ds)
     return ds
 
 def configure_variables(ds, old_var, new_var):
