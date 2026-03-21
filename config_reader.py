@@ -29,7 +29,7 @@ def read_config_file():
     config.read('./config.ini')
 
     # Regridding information
-    weights_path = config['Regridding']['weights_file']
+    weights_dir = config['Regridding']['weights_dir']
     regrid_scheme = config['Regridding']['regrid_scheme']
     icesheet = config['Regridding']['icesheet']
     if icesheet == 'GIS': 
@@ -61,6 +61,8 @@ def read_config_file():
     #Boolean cases
     normal = config.getboolean('Cases', 'normal', fallback=True)
     gradients = config.getboolean('Cases', 'gradients', fallback=False)
+
+    weights_path = f'{weights_dir}{icesheet}/weights/{icesheet}_{method}_{res}_weights.nc'
 
     # Return the populated Dataclass object directly
     return RegridConfig(
