@@ -101,7 +101,7 @@ def update_attributes(ds, var):
 
 def mask_output(ds, mask_file):
     mask = xr.open_dataset(mask_file)
-    return ds.where(mask.mask==1)
+    return ds.where(mask.mask_dilated==1)
 
 def save_netdf(ds, outpath):
     day1850 = cftime.datetime(1850,1,1)
