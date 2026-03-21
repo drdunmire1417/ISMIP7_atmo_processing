@@ -128,7 +128,7 @@ def add_coords(ds, epsg_code):
         y_b = np.append(y - dy/2, y[-1] + dy/2)
         X_b, Y_b = np.meshgrid(x_b, y_b)
         return X_b,Y_b
-    if epsg_code == 3031:
+    if epsg_code == 3031 or epsg_code==3413:
         proj = pyproj.Proj(f"EPSG:{epsg_code}")
         x = ds['x'].values
         y = ds['y'].values

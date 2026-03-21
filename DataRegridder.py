@@ -80,6 +80,7 @@ class DataRegridder:
         if os.path.exists(output_path): print(f'Skipping {output_path}... already exists')
         else:
             ds_src = ds_src[[self.src_var]]
+            if self.dest_var == 'tas': ds_src = ds_src.where((ds_src.t2mcorr>220)&(ds_src.t2mcorr<285))
             ds_src = fill_nearest_2d(ds_src, self.src_var)
             if self.dest_var == 'tas': ds_out = ds_src.interp_like(self.target_grid, method="linear")
             else:
