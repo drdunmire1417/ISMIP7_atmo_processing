@@ -7,6 +7,7 @@ class RegridConfig:
     icesheet: str
     res: int
     weights_path: str
+    masks_path: str
     NUM_WORKERS: int
     regrid_scheme: str
 
@@ -30,6 +31,7 @@ def read_config_file():
 
     # Regridding information
     weights_dir = config['Regridding']['weights_dir']
+    masks_dir = config['Regridding']['masks_dir']
     regrid_scheme = config['Regridding']['regrid_scheme']
     icesheet = config['Regridding']['icesheet']
     if icesheet == 'GIS': 
@@ -62,13 +64,15 @@ def read_config_file():
     normal = config.getboolean('Cases', 'normal', fallback=True)
     gradients = config.getboolean('Cases', 'gradients', fallback=False)
 
-    weights_path = f'{weights_dir}{icesheet}/weights/{icesheet}_{method}_{res}_weights.nc'
+    weights_path = f'{weights_dir}{icesheet}_{method}_{res}_weights.nc'
+    masks_path = f'{masks_dir}{icesheet}_mask_ISMIP_{res}.nc'
 
     # Return the populated Dataclass object directly
     return RegridConfig(
         icesheet=icesheet,
         res=res,
         weights_path=weights_path,
+        masks_path=masks_path,
         NUM_WORKERS=num_workers,
         regrid_scheme=regrid_scheme, 
 

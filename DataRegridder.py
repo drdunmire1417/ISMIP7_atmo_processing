@@ -15,17 +15,13 @@ class DataRegridder:
         """Initialize the regridder with the specific configuration object."""
         self.config = config
         self.target_grid = self.create_target_grid()
-        if self.config.icesheet=='AIS': 
-            self.mask_file = '/projects/grid/ghub/ISMIP6/devon/grid/AIS/AIS_mask_ISMIP_2km.nc'
-        else: 
-            self.mask_file = '/projects/grid/ghub/ISMIP6/devon/grid/GIS/GrIS_mask_ISMIP_1km.nc'
 
         if self.config.src_epsg=='4326': self.periodic = True
         else: self.periodic = False
         self.regridder_obj = None
 
         self.dest_var = var
-        with open(f'/projects/grid/ghub/ISMIP6/devon/ISMIP_regridding/readmes/{self.config.method}.json', 'r') as f:
+        with open(f'attrs/{self.config.method}.json', 'r') as f:
             j = json.load(f)
             self.dest_units = j[var]['dest_units']
             self.src_units = j[var]['src_units']
@@ -89,7 +85,7 @@ class DataRegridder:
                     self.regridder_obj = make_regridder(ds_src_bounded, self.target_grid, self.config.regrid_scheme, True, self.config.weights_path, self.periodic)
 
                 ds_out = self.regridder_obj(ds_src_bounded, keep_attrs=True)
-            ds_out = mask_output(ds_out, self.mask_file)
+            ds_out = mask_output(ds_out, self.config.masks_path)
 
             ds_out = add_time_noleap(ds_out, year)
             ds_out = configure_variables(ds_out, self.src_var,self.dest_var)
@@ -185,7 +181,7 @@ class DataRegridder:
 
                 print('here')
                 ds_out = ds_chunk.interp_like(self.target_grid, method="linear")
-                ds_out = mask_output(ds_out, self.mask_file)
+                ds_out = mask_output(ds_out, self.config.masks_path)
                 ds_out = add_time_noleap_annual(ds_out, chunk_start, chunk_end)
                 ds_out = configure_variables(ds_out, self.config.gradient_src_var, grad_var)
                 ds_out = ds_out.fillna(self.FILL_VALUE)  
@@ -235,7 +231,7 @@ def regrid_CMIP(self):
 
                 print('here')
                 ds_out = ds_chunk.interp_like(self.target_grid, method="linear")
-                ds_out = mask_output(ds_out, self.mask_file)
+                ds_out = mask_output(ds_out, self.config.masks_path)
                 ds_out = add_time_noleap_annual(ds_out, chunk_start, chunk_end)
                 ds_out = configure_variables(ds_out, self.config.gradient_src_var, grad_var)
                 ds_out = ds_out.fillna(self.FILL_VALUE) 

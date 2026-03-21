@@ -72,7 +72,7 @@ def add_time_noleap_annual(ds, syear, eyear):
 
 def update_attributes(ds, var):
 
-    with open('/projects/grid/ghub/ISMIP6/devon/ISMIP_regridding/readmes/var_attributes.json', 'r') as f:
+    with open('attrs/var_attributes.json', 'r') as f:
         attr_map = json.load(f)
 
     if var in attr_map:
