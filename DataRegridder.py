@@ -107,7 +107,7 @@ class DataRegridder:
                 out_dir_ts = self.out_dir.replace("/tas/", "/ts/")
                 os.makedirs(out_dir_ts, exist_ok=True)
                 output_path_ts = os.path.join(out_dir_ts, out_file_ts)
-                save_netdf(ds_ts, output_path_ts)
+                save_netdf(ds_ts, output_path_ts, fix_time = False)
 
     def compute_weights(self, source_file):
         if source_file.endswith('.gz'):

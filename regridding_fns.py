@@ -111,17 +111,18 @@ def mask_output(ds, mask_file):
     mask = xr.open_dataset(mask_file)
     return ds.where(mask.mask_dilated==1)
 
-def save_netdf(ds, outpath):
-    day1850 = cftime.datetime(1850,1,1)
-    time_int = [(t - day1850).days for t in ds.time.values]
-    ds['time'] = time_int
-    ds.time.attrs.update({
-            'standard_name': 'time',
-            'long_name': 'time',
-            'axis': 'T',
-            'units': 'days since 1850-01-01 00:00:00',
-            'calendar': 'standard'
-        })
+def save_netdf(ds, outpath, fix_time = False):
+    if fix_time:
+        day1850 = cftime.datetime(1850,1,1)
+        time_int = [(t - day1850).days for t in ds.time.values]
+        ds['time'] = time_int
+        ds.time.attrs.update({
+                'standard_name': 'time',
+                'long_name': 'time',
+                'axis': 'T',
+                'units': 'days since 1850-01-01 00:00:00',
+                'calendar': 'standard'
+            })
 
     vars_to_encode = list(ds.data_vars) + ['x', 'y', 'time']
     encoding_dict = {var: {'dtype': 'float32', '_FillValue': FILL_VALUE, 'missing_value': FILL_VALUE} for var in vars_to_encode}
