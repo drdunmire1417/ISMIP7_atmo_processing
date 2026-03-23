@@ -25,7 +25,7 @@ my_config = read_config_file()
 if __name__ == '__main__':
     for var in my_config.var_list:
         print('Working on variable:', var)
-        with open(f'/projects/grid/ghub/ISMIP6/devon/ISMIP_regridding/readmes/{my_config.method}.json', 'r') as f:
+        with open(f'attrs/{my_config.method}.json', 'r') as f:
             j = json.load(f)
             src_var = j[var]['src_folder']
 
