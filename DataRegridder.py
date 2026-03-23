@@ -89,7 +89,6 @@ class DataRegridder:
 
                 ds_out = self.regridder_obj(ds_src_bounded, keep_attrs=True)
             ds_out = mask_output(ds_out, self.config.masks_path)
-
             ds_out = add_time_noleap(ds_out, year)
             ds_out = configure_variables(ds_out, self.src_var,self.dest_var)
             ds_out = ds_out.fillna(self.FILL_VALUE) 
@@ -101,6 +100,7 @@ class DataRegridder:
             if self.dest_var == 'tas':
                 ds_ts = ds_out.copy()
                 ds_ts['tas'] = ds_out['tas'].where(ds_out['tas'] < 273.15, 273.15)
+                ds_ts = mask_output(ds_ts, self.config.masks_path).fillna(self.FILL_VALUE)
                 ds_ts = ds_ts.rename({'tas':'ts'})
                 ds_ts = update_attributes(ds_ts, 'ts')
                 out_file_ts = f'ts_{self.config.icesheet}_{self.config.gcm}_{self.config.scenario}_{self.config.method}_v{self.config.version}_{year}.nc'
