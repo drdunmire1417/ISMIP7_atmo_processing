@@ -13,7 +13,7 @@ FILL_VALUE = netCDF4.default_fillvals['f4']
 
 def fill_nearest_2d_only(ds, var, mask_file, mask_temp = False):
     mask = xr.open_dataset(mask_file)
-    da = ds[var].where(mask.mask != 0)
+    da = ds[var].where(mask.mask.values != 0)
     if mask_temp: da = da.where((da>220)&(da<285))
     data = da.values
     
@@ -28,7 +28,6 @@ def fill_nearest_2d_only(ds, var, mask_file, mask_temp = False):
             data[t, :, :] = slice_2d[tuple(ind)]
             
     ds[var] = da.copy(data=data)
-    print(ds)
     return ds
 
 def configure_variables(ds, old_var, new_var):

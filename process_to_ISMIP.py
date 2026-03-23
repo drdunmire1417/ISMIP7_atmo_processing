@@ -100,10 +100,10 @@ if __name__ == '__main__':
                 clim = anom.get_climatology()
                 files = glob(f'{my_config.out_dir}{my_config.icesheet}/{my_config.gcm}/{my_config.scenario}/{my_config.method}_processed/ts/v{my_config.version}/*.nc')
             
-            NUM_WORKERS = my_config.NUM_WORKERS 
-            print(f"Starting parallel anomaly processing on {NUM_WORKERS} cores... ")
-            with ProcessPoolExecutor(max_workers=NUM_WORKERS) as executor:
-                list(executor.map(partial(anom.compute_anomalies_file, clim), files))
+                NUM_WORKERS = my_config.NUM_WORKERS 
+                print(f"Starting parallel anomaly processing on {NUM_WORKERS} cores... ")
+                with ProcessPoolExecutor(max_workers=NUM_WORKERS) as executor:
+                    list(executor.map(partial(anom.compute_anomalies_file, clim), files))
             print("Done!")
 
 
