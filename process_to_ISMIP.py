@@ -31,7 +31,6 @@ if __name__ == '__main__':
 
         src_dir = f'{my_config.src_dir}{src_var}/'
         source_files = glob(f'{src_dir}*')
-        print(src_dir, source_files)
         _worker_regridder = None
         local_pipeline = DataRegridder(my_config,var)
 
