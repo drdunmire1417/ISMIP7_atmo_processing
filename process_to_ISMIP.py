@@ -23,6 +23,8 @@ print("\nReading config file...")
 my_config = read_config_file()
 
 if __name__ == '__main__':
+    os.makedirs('weights/', exist_ok=True)
+    os.makedirs('masks/', exist_ok=True)
     for var in my_config.var_list:
         print('Working on variable:', var)
         with open(f'attrs/{my_config.method}.json', 'r') as f:

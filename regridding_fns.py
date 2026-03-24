@@ -12,23 +12,27 @@ import netCDF4
 FILL_VALUE = netCDF4.default_fillvals['f4']
 
 def fill_nearest_2d_only(ds, var, mask_file, mask_temp = False):
-    mask = xr.open_dataset(mask_file)
-    da = ds[var].where(mask.mask.values != 0)
-    if mask_temp: da = da.where((da>220)&(da<285))
-    data = da.values
-    
-    # Loop through each time step (index 0)
-    for t in range(data.shape[0]):
-        slice_2d = data[t, :, :]
-        mask = np.isnan(slice_2d)
+    if os.path.exists(mask_file):
+        mask = xr.open_dataset(mask_file)
+        da = ds[var].where(mask.mask.values != 0)
+        if mask_temp: da = da.where((da>220)&(da<285))
+        data = da.values
         
-        # Only fill if there are NaNs and at least one valid value
-        if np.any(mask) and not np.all(mask):
-            ind = ndimage.distance_transform_edt(mask, return_indices=True, return_distances=False)
-            data[t, :, :] = slice_2d[tuple(ind)]
+        # Loop through each time step (index 0)
+        for t in range(data.shape[0]):
+            slice_2d = data[t, :, :]
+            mask = np.isnan(slice_2d)
             
-    ds[var] = da.copy(data=data)
-    return ds
+            # Only fill if there are NaNs and at least one valid value
+            if np.any(mask) and not np.all(mask):
+                ind = ndimage.distance_transform_edt(mask, return_indices=True, return_distances=False)
+                data[t, :, :] = slice_2d[tuple(ind)]
+                
+        ds[var] = da.copy(data=data)
+        return ds
+    else: 
+        print("please provide a mask file for the source dataset")
+        raise ValueError(f"ERROR: Could not find {mask_file}")
 
 def configure_variables(ds, old_var, new_var):
     try: ds = ds.drop_vars(['lat','lon','lat_b','lon_b'])
@@ -108,8 +112,12 @@ def update_attributes(ds, var):
     return ds
 
 def mask_output(ds, mask_file):
-    mask = xr.open_dataset(mask_file)
-    return ds.where(mask.mask_dilated==1)
+    if os.path.exists(mask_file):
+        mask = xr.open_dataset(mask_file)
+        return ds.where(mask.mask_dilated==1)
+    else: 
+        print("please provide mask file for output")
+        ValueError(f"ERROR: Could not find {mask_file}")
 
 def save_netdf(ds, outpath, fix_time = True):
     if fix_time:
