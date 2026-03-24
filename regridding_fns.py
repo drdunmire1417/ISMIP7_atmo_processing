@@ -114,7 +114,7 @@ def update_attributes(ds, var):
 def mask_output(ds, mask_file):
     if os.path.exists(mask_file):
         mask = xr.open_dataset(mask_file)
-        return ds.where(mask.mask_dilated==1)
+        return ds.where(mask.mask==1)
     else: 
         print("please provide mask file for output")
         ValueError(f"ERROR: Could not find {mask_file}")
