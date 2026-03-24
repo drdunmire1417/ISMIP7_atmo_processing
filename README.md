@@ -3,12 +3,14 @@ This package processes atmospheric forcing data for ISMIP7. It will regrid to th
 1) Clone the repository
    
 2) If it does not already exist, you may need to create an attribute file for the source dataset. This file should be named ```<method>.json``` and should be located in the ```attrs/``` directory. For each variable from the source dataset to process, it should contain the following information:
-    ``` "acabf": { # ISMIP7 variable name
+    ```
+    "acabf": { # ISMIP7 variable name
       "dest_units": "kg m-2 s-1", #ISMIP7 variable units
       "src_units": "mmwe", #variable units from source dataset
       "src_var": "smb_rec", #variable name from source dataset
       "src_folder": "smb_rec" #name of folder where output is located (sometimes the same as src_var, but not necessarily)
-    } 
+    }
+    ```
 
 3) You also need a mask file for both the source dataset and the output. The mask files should be netcdf files with the following naming convention:
 
@@ -20,7 +22,8 @@ In both source and output mask files, the netcdf variable should be "mask". For 
 
 4) Edit the configuration file: ```config.ini```. Below are some notes on the configuration file:
 
-    ```[Regridding]
+    ```
+    [Regridding]
     icesheet = AIS  # Target Ice Sheet (AIS or GrIS)
     target_res = 2000 # if not set, AIS = 2000, GrIS = 1000
     weights_dir = weights/ #path to where weights files are stored
@@ -44,6 +47,7 @@ In both source and output mask files, the netcdf variable should be "mask". For 
     [Cases]
     normal = yes #yes or no to regrid the output files
     gradients = no  #yes or no to regrid the gradient files
+    ```
 
 
    
