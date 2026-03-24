@@ -1,7 +1,8 @@
 OUTPUT/
 __pycache__/
 log/
-weights/
 config.ini
 run_processing.slurm
 masks/
+weights/
+
