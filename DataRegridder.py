@@ -14,7 +14,7 @@ class DataRegridder:
     def __init__(self, config, var):
         """Initialize the regridder with the specific configuration object."""
         self.config = config
-        self.target_grid = self.create_target_grid()
+        self.target_grid = create_target_grid(self.config.icesheet, self.config.res)
 
         if self.config.src_epsg=='4326': self.periodic = True
         else: self.periodic = False

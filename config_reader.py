@@ -63,9 +63,8 @@ def read_config_file():
     varlist_str = config.get('Output', 'var_list')
     var_list = [v.strip() for v in varlist_str.split(', ')]
     
-
     # Gradient information
-    grad_dir = config['Gradients']['gradients_dir']
+    grad_dir = f'{src_dir}/Gradients/'
     grad_varlist_str = config['Gradients']['gradients_var_list']
     grad_var_list = [v.strip() for v in grad_varlist_str.split(', ')]
     

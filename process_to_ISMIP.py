@@ -3,6 +3,7 @@ from glob import glob
 from concurrent.futures import ProcessPoolExecutor
 from config_reader import read_config_file
 from DataRegridder import DataRegridder
+from GradientRegridder import GradientRegridder
 from Climatology import Climatology
 from Anomalies import Anomalies
 import xarray as xr
@@ -110,8 +111,14 @@ if __name__ == '__main__':
 
 
 
-#     # ## 3 - Regrid gradients
-#     # if my_config.gradients:
-#     #     os.makedirs(my_config.gradient_out_dir, exist_ok=True)
-#     #     print('Processing gradients...')
-#     #     local_pipeline.regrid_gradients()
+    ## 5 - Regrid gradients
+    if my_config.gradients:
+        print("\n### -------------- STEP 5 Regridding Gradients -------------- ###\n")
+        print("Processing Anomalies ... ")
+        for var in my_config.grad_var_list[0:1]:
+            print('Working on variable:', var)
+            gradient_regridder = GradientRegridder(my_config,var)
+
+
+        # print('Processing gradients...')
+        # local_pipeline.regrid_gradients()

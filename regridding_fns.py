@@ -11,6 +11,41 @@ import netCDF4
 
 FILL_VALUE = netCDF4.default_fillvals['f4']
 
+def create_target_grid(icesheet, res):
+    """
+    Creates the target grid for regridding for AIS or GIS
+    """
+    if icesheet=='AIS':
+        x_coords = np.arange(-3040000, 3040000+res,res)
+        y_coords = np.arange(-3040000, 3040000+res,res)
+
+        ds_target = xr.Dataset(
+            data_vars=dict(
+                dummy=(["y", "x"], np.zeros((y_coords.shape[0], x_coords.shape[0]))),
+            ),
+            coords=dict(
+                x=("x", x_coords),
+                y=("y", y_coords),
+            ),
+        )
+        ds_target2 =  add_coords(ds_target, 3031)
+    else:
+        x_coords = np.arange(-720000, 960000+res,res)
+        y_coords = np.arange(-3450000, -570000+res,res)
+
+        ds_target = xr.Dataset(
+            data_vars=dict(
+                dummy=(["y", "x"], np.zeros((y_coords.shape[0], x_coords.shape[0]))),
+            ),
+            coords=dict(
+                x=("x", x_coords),
+                y=("y", y_coords),
+            ),
+        )
+        ds_target2 =  add_coords(ds_target, 3413)
+
+    return ds_target2  
+
 def fill_nearest_2d_only(ds, var, mask_file, mask_temp = False):
     if os.path.exists(mask_file):
         mask = xr.open_dataset(mask_file)
