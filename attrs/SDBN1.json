@@ -43,6 +43,8 @@
         "grad_var_name": "gradient"
     },
     "ts":{
+        "dest_units": "K",
+        "src_units": "K",
         "grad_file_name": "tskin_reg",
         "grad_var_name": "gradient"
     },

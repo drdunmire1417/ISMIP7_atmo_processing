@@ -74,7 +74,6 @@ class DataRegridder:
         out_file = f'{self.dest_var}_{self.config.icesheet}_{self.config.gcm}_{self.config.scenario}_{self.config.method}_v{self.config.version}_{year}.nc'
         output_path = os.path.join(self.out_dir, out_file)
         if os.path.exists(output_path): print(f'Skipping {output_path}... already exists')
-        #print(self.config.src_mask)
         else:
             ds_src = ds_src[[self.src_var]]
             if self.dest_var == 'tas': 

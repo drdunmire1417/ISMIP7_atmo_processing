@@ -115,9 +115,10 @@ if __name__ == '__main__':
     if my_config.gradients:
         print("\n### -------------- STEP 5 Regridding Gradients -------------- ###\n")
         print("Processing Anomalies ... ")
-        for var in my_config.grad_var_list[0:1]:
+        for var in my_config.grad_var_list:
             print('Working on variable:', var)
             gradient_regridder = GradientRegridder(my_config,var)
+            gradient_regridder.regrid_gradients()
 
 
         # print('Processing gradients...')

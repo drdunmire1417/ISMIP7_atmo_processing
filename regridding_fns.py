@@ -8,6 +8,7 @@ from scipy import ndimage
 import xesmf as xe
 import json
 import netCDF4
+import os
 
 FILL_VALUE = netCDF4.default_fillvals['f4']
 
@@ -46,7 +47,7 @@ def create_target_grid(icesheet, res):
 
     return ds_target2  
 
-def fill_nearest_2d_only(ds, var, mask_file, mask_temp = False):
+def fill_nearest_2d_only(ds, var, mask_file , mask_temp = False):
     if os.path.exists(mask_file):
         mask = xr.open_dataset(mask_file)
         da = ds[var].where(mask.mask.values != 0)
