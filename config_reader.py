@@ -22,6 +22,9 @@ class RegridConfig:
     scratch_dir: str
     var_list: list
     version: int
+
+    grad_dir: str
+    grad_var_list: str
     
     gradients: bool
     normal: bool
@@ -59,7 +62,13 @@ def read_config_file():
     version = config.getint('Output', 'version', fallback=1)
     varlist_str = config.get('Output', 'var_list')
     var_list = [v.strip() for v in varlist_str.split(', ')]
-    print('Variables to procces:', var_list)
+    
+
+    # Gradient information
+    grad_dir = config['Gradients']['gradients_dir']
+    grad_varlist_str = config['Gradients']['gradients_var_list']
+    grad_var_list = [v.strip() for v in grad_varlist_str.split(', ')]
+    
 
     #Boolean cases
     normal = config.getboolean('Cases', 'normal', fallback=True)
@@ -68,6 +77,11 @@ def read_config_file():
     weights_path = f'{weights_dir}{icesheet}_{method}_{res}_weights.nc'
     masks_path = f'{masks_dir}{icesheet}_mask_ISMIP_{res}.nc'
     src_mask = f'{masks_dir}{icesheet}_mask_{method}.nc'
+
+    if not normal: var_list = []
+    if not gradients: grad_var_list = []
+    print('Variables to process:', var_list)
+    print('Variables to process gradients:', grad_var_list)
 
     # Return the populated Dataclass object directly
     return RegridConfig(
@@ -89,6 +103,9 @@ def read_config_file():
         scratch_dir=scratch_dir,
         var_list=var_list,
         version=version,
+
+        grad_dir=grad_dir,
+        grad_var_list=grad_var_list,
         
         gradients=gradients,
         normal=normal,
