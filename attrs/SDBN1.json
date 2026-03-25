@@ -4,13 +4,17 @@
       "dest_units": "kg m-2 s-1",
       "src_units": "mmwe",
       "src_var": "smb_rec",
-      "src_folder": "smb_rec"
+      "src_folder": "smb_rec",
+      "grad_file_name": "smb_rec_reg",
+      "grad_var_name": "gradient"
     },
     "mrro": {
         "dest_units": "kg m-2 s-1",
         "src_units": "mmwe",
         "src_var": "runoffcorr",
-        "src_folder": "runoff"
+        "src_folder": "runoff",
+        "grad_file_name": "runoff_reg",
+        "grad_var_name": "gradient"
     },
     "pr": {
         "dest_units": "kg m-2 s-1",
@@ -34,8 +38,14 @@
         "dest_units": "K",
         "src_units": "K",
         "src_var": "t2mcorr",
-        "src_folder": "t2m"
+        "src_folder": "t2m",
+        "grad_file_name": "t2m_reg",
+        "grad_var_name": "gradient"
     },
+    "ts":{
+        "grad_file_name": "tskin_reg",
+        "grad_var_name": "gradient"
+    }
     "dacabfdz": {
         "dest_units": "kg m-2 s-1",
         "src_units": "mmwe",
