@@ -1,5 +1,6 @@
 import configparser
 from dataclasses import dataclass
+import json
 
 # Define the structure and expected types of your config
 @dataclass
@@ -50,11 +51,13 @@ def read_config_file():
     src_dir = config['Source']['src_dir']
     gcm = config['Source']['gcm']
     scenario = config['Source']['scenario']
-    method = config['Source']['method']   
-    try: 
-        src_epsg = int(config['Source']['src_epsg'])
-    except ValueError: 
-        raise ValueError('Source epsg must be an integer')
+    method = config['Source']['method'] 
+    with open(f'attrs/{method}.json', 'r') as f:
+        j = json.load(f)
+        try: 
+            src_epsg = int(j['epsg'][icesheet])
+        except ValueError: 
+            raise ValueError('Source epsg not properly defined in attribute file - must be an integer')
     
     # Output information
     scratch_dir = config['Output']['scratch_dir']

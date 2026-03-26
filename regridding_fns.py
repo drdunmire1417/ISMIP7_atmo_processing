@@ -112,7 +112,7 @@ def add_time_noleap(ds, year):
 def add_time_noleap_annual(ds, syear, eyear):
     num_years = len(ds.time)   
     time_array = [
-        cftime.datetime(syear + i, 1, 15) 
+        cftime.datetime(syear + i, 12, 31) 
         for i in range(num_years)
     ]   
     ds['time'] = np.array(time_array, dtype=object)
@@ -126,19 +126,19 @@ def update_attributes(ds, var):
     if var in attr_map:
         ds[var].attrs = attr_map[var]
 
-    ds.y.attrs.update({
+    ds.y.attrs = {
         'long_name': 'Cartesian y-coordinate',
         'standard_name': 'projection_y_coordinate',
         'units': 'meter',
         'axis': 'Y'
-    })
+    }
 
-    ds.x.attrs.update({
+    ds.x.attrs = {
         'long_name': 'Cartesian x-coordinate',
         'standard_name': 'projection_x_coordinate',
         'units': 'meter',
         'axis': 'X'
-    })
+    }
 
     ds.attrs.update({
         'comment': 'Prepared for ISMIP7 by Devon Dunmire using xesmf ddunmire@buffalo.edu',

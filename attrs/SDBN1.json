@@ -1,5 +1,9 @@
 
 {
+    "epsg":{
+        "AIS":3031,
+        "GrIS":3413
+    },
     "acabf": {
       "dest_units": "kg m-2 s-1",
       "src_units": "mmwe",

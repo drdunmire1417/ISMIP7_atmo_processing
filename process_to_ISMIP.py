@@ -24,8 +24,10 @@ print("\nReading config file...")
 my_config = read_config_file()
 
 if __name__ == '__main__':
+
     os.makedirs('weights/', exist_ok=True)
     os.makedirs('masks/', exist_ok=True)
+    
     for var in my_config.var_list:
         print('Working on variable:', var)
         with open(f'attrs/{my_config.method}.json', 'r') as f:
@@ -107,9 +109,6 @@ if __name__ == '__main__':
                 with ProcessPoolExecutor(max_workers=NUM_WORKERS) as executor:
                     list(executor.map(partial(anom.compute_anomalies_file, clim), files))
             print("Done!")
-
-
-
 
     ## 5 - Regrid gradients
     if my_config.gradients:
