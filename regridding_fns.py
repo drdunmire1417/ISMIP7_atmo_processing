@@ -9,6 +9,7 @@ import xesmf as xe
 import json
 import netCDF4
 import os
+from glob import glob
 
 FILL_VALUE = netCDF4.default_fillvals['f4']
 
@@ -71,7 +72,9 @@ def fill_nearest_2d_only(ds, var, mask_file , mask_temp = False):
         raise ValueError(f"ERROR: Could not find {mask_file}")
 
 def configure_variables(ds, old_var, new_var):
-    try: ds = ds.drop_vars(['lat','lon','lat_b','lon_b'])
+    try: 
+        for var in ['lat','lon','lat_b','lon_b']:
+            ds = ds.drop_vars([var])
     except: x=1
     return ds.rename({old_var:new_var})
 
@@ -220,3 +223,17 @@ def make_regridder(source, target, method, reuse_weights, weights_path, periodic
         filename=weights_path,
         periodic = periodic
     )
+
+def copy_last_year(dirr, var, last_file):
+    files = []
+    for year in np.arange(2290,2300):
+        f = glob(f'{dirr}/{var}_*_{year}.nc')[0]
+        files.append(f)        
+        
+    ds = xr.open_mfdataset(files, use_cftime=True)
+    ds = ds.groupby(ds.time.dt.month).mean()
+    ds = ds.rename({'month':'time'})
+    ds['time'] = [cftime.datetime(2300, month, 15) for month in range(1, 13)]
+    ds.attrs.update({'comment':'Prepared for ISMIP7 by Devon Dunmire using xesmf ddunmire@buffalo.edu/nYear 2300 computed as average of years 2290-2299'})
+    save_netdf(ds, dirr+last_file)
+                        
