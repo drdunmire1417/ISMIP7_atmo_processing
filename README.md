@@ -5,14 +5,20 @@ This package processes atmospheric forcing data for ISMIP7. It will regrid to th
 2) If it does not already exist, you may need to create an attribute file for the source dataset. This file should be named ```<method>.json``` and should be located in the ```attrs/``` directory. For each variable from the source dataset to process, it should contain the following information:
     ```
     "acabf": { # ISMIP7 variable name
-      "dest_units": "kg m-2 s-1", #ISMIP7 variable units
-      "src_units": "mmwe", #variable units from source dataset
-      "src_var": "smb_rec", #variable name from source dataset
-      "src_folder": "smb_rec" #name of folder where output is located (sometimes the same as src_var, but not necessarily)
+       "dest_units": "kg m-2 s-1", #ISMIP7 variable units
+       "src_units": "mmwe", #variable units from source dataset
+       "src_var": "smb_rec", #variable name from source dataset
+       "src_folder": "smb_rec" #name of folder where output is located (sometimes the same as src_var, but not necessarily)
     }
     ```
+   There should also be an entry with the projection information for both icesheets:
+   ```
+   "epsg":{ 
+        "AIS":3031, #can be 'curvilinear' if output is from RCM
+        "GrIS":3413 #can be 'curvilinear' if output is from RCM
+    },
 
-3) You also need a mask file for both the source dataset and the output. The mask files should be netcdf files with the following naming convention:
+4) You also need a mask file for both the source dataset and the output. The mask files should be netcdf files with the following naming convention:
 
 source data mask file: ```<icesheet>_mask_<method>.nc```, where ```<icesheet>``` is either ```AIS``` for Antarctica, or ```GrIS``` for Greenland
 
@@ -33,10 +39,12 @@ In both source and output mask files, the netcdf variable should be "mask". For 
     
     [Source]
     src_dir = /projects/grid/ghub/ISMIP7/prep/AIS/CESM2/historical/SDBN1_raw/v1/ #directory where source data is stored
-    src_epsg = 3031 #EPSG code for source data. Should be a 4-digit code. TODO: add functionality for "curvilinear"
     gcm = CESM2-WACCM #name of GCM
     scenario = historical #name of projection
     method = SDBN1 #SMB downscaling method name
+
+   [Gradients]
+   gradients_var_list = acabf, mrro, tas, ts #variables to regrid gradient files
     
     [Output]
     output_dir = /projects/grid/ghub/ISMIP6/devon/ISMIP7_atmo_processing/OUTPUT/ #base directory to store output
