@@ -1,8 +1,10 @@
 This package processes atmospheric forcing data for ISMIP7. It will regrid to the ISMIP7 projection, compute climatology and anomalies, and format the output with the correct naming convention.
 
 1) Clone the repository
+
+2) You can create a python environment using the ```environment.yml``` file shared in this repository
    
-2) If it does not already exist, you may need to create an attribute file for the source dataset. This file should be named ```<method>.json``` and should be located in the ```attrs/``` directory. For each variable from the source dataset to process, it should contain the following information:
+3) If it does not already exist, you may need to create an attribute file for the source dataset. This file should be named ```<method>.json``` and should be located in the ```attrs/``` directory. For each variable from the source dataset to process, it should contain the following information:
     ```
     "acabf": { # ISMIP7 variable name
        "dest_units": "kg m-2 s-1", #ISMIP7 variable units
@@ -56,6 +58,6 @@ In both source and output mask files, the netcdf variable should be "mask". For 
     normal = yes #yes or no to regrid the output files
     gradients = no  #yes or no to regrid the gradient files
     ```
-
+5) To run the processing code you can either run in the command line with ```python process_to_ISMIP.py```, or as a job using the slurm script: ```sbatch run_processing.slurm```. Some of the details of the slurm script may need to be changed for your set-up (i.e. activating the python environment), but it is important to note that the ```--cpus-per-task``` parameter should equal the ```NUM_WORKERS``` parameter set in the config file.
 
    
