@@ -1,0 +1,20 @@
+name: regrid
+channels:
+  - conda-forge
+  - nvidia
+  - bioconda
+dependencies:
+  - cuda
+  - gcc=12.4
+  - python=3.11
+  - pip
+  - xesmf
+  - xarray
+  - dask
+  - scipy
+  - netcdf4
+  - pandas
+  - ipykernel
+  - pyproj
+  - jupyter
+  - matplotlib   
