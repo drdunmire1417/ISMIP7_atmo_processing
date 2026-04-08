@@ -97,39 +97,39 @@ if __name__ == '__main__':
                     clim.save_climatology(climatology)
 
 
-    #         # 4 compute anomalies
-    #         print("\n### -------------- STEP 4 Anomalies -------------- ###\n")
-    #         print("Computing Anomalies ... ")
-    #         anom = Anomalies(var, my_config.icesheet, my_config.gcm, my_config.method, my_config.scenario, my_config.version, my_config.out_dir)
-    #         clim = anom.get_climatology()
-    #         files = glob(f'{my_config.out_dir}{my_config.icesheet}/{my_config.gcm}/{my_config.scenario}/{my_config.method}_processed/{var}/v{my_config.version}/*.nc')
+            # 4 compute anomalies
+            print("\n### -------------- STEP 4 Anomalies -------------- ###\n")
+            print("Computing Anomalies ... ")
+            anom = Anomalies(var, my_config.icesheet, my_config.gcm, my_config.method, my_config.scenario, my_config.version, my_config.out_dir)
+            clim = anom.get_climatology()
+            files = glob(f'{my_config.out_dir}{my_config.icesheet}/{my_config.gcm}/{my_config.scenario}/{my_config.method}_processed/{var}/v{my_config.version}/*.nc')
             
-    #         NUM_WORKERS = my_config.NUM_WORKERS 
-    #         print(f"Starting parallel anomaly processing on {NUM_WORKERS} cores... ")
-    #         with ProcessPoolExecutor(max_workers=NUM_WORKERS) as executor:
-    #             list(executor.map(partial(anom.compute_anomalies_file, clim), files))
-    #         print("Done!")
+            NUM_WORKERS = my_config.NUM_WORKERS 
+            print(f"Starting parallel anomaly processing on {NUM_WORKERS} cores... ")
+            with ProcessPoolExecutor(max_workers=NUM_WORKERS) as executor:
+                list(executor.map(partial(anom.compute_anomalies_file, clim), files))
+            print("Done!")
 
-    #         if var == 'tas':
-    #             anom = Anomalies('ts', my_config.icesheet, my_config.gcm, my_config.method, my_config.scenario, my_config.version, my_config.out_dir)
-    #             clim = anom.get_climatology()
-    #             files = glob(f'{my_config.out_dir}{my_config.icesheet}/{my_config.gcm}/{my_config.scenario}/{my_config.method}_processed/ts/v{my_config.version}/*.nc')
+            if var == 'tas':
+                anom = Anomalies('ts', my_config.icesheet, my_config.gcm, my_config.method, my_config.scenario, my_config.version, my_config.out_dir)
+                clim = anom.get_climatology()
+                files = glob(f'{my_config.out_dir}{my_config.icesheet}/{my_config.gcm}/{my_config.scenario}/{my_config.method}_processed/ts/v{my_config.version}/*.nc')
             
-    #             NUM_WORKERS = my_config.NUM_WORKERS 
-    #             print(f"Starting parallel anomaly processing on {NUM_WORKERS} cores... ")
-    #             with ProcessPoolExecutor(max_workers=NUM_WORKERS) as executor:
-    #                 list(executor.map(partial(anom.compute_anomalies_file, clim), files))
-    #         print("Done!")
+                NUM_WORKERS = my_config.NUM_WORKERS 
+                print(f"Starting parallel anomaly processing on {NUM_WORKERS} cores... ")
+                with ProcessPoolExecutor(max_workers=NUM_WORKERS) as executor:
+                    list(executor.map(partial(anom.compute_anomalies_file, clim), files))
+            print("Done!")
 
-    # ## 5 - Regrid gradients
-    # if my_config.gradients:
-    #     print("\n### -------------- STEP 5 Regridding Gradients -------------- ###\n")
-    #     print("Processing Anomalies ... ")
-    #     for var in my_config.grad_var_list:
-    #         print('Working on variable:', var)
-    #         gradient_regridder = GradientRegridder(my_config,var)
-    #         gradient_regridder.regrid_gradients()
+    ## 5 - Regrid gradients
+    if my_config.gradients:
+        print("\n### -------------- STEP 5 Regridding Gradients -------------- ###\n")
+        print("Processing Anomalies ... ")
+        for var in my_config.grad_var_list:
+            print('Working on variable:', var)
+            gradient_regridder = GradientRegridder(my_config,var)
+            gradient_regridder.regrid_gradients()
 
 
-    #     # print('Processing gradients...')
-    #     # local_pipeline.regrid_gradients()
+        # print('Processing gradients...')
+        # local_pipeline.regrid_gradients()

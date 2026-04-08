@@ -1,0 +1,32 @@
+
+{
+    "epsg":{
+        "AIS":3031,
+        "GrIS":3413
+    },
+    "acabf": {
+      "dest_units": "kg m-2 s-1",
+      "src_units": "kg m-2 s-1",
+      "src_var": "acabf",
+      "src_folder": "acabf"
+    },
+    "mrro": {
+        "dest_units": "kg m-2 s-1",
+        "src_units": "kg m-2 s-1",
+        "src_var": "mrro",
+        "src_folder": "mrro"
+    },
+    "pr": {
+        "dest_units": "kg m-2 s-1",
+        "src_units": "kg m-2 s-1",
+        "src_var": "pr",
+        "src_folder": "pr"
+    },
+    "rainf": {
+        "dest_units": "kg m-2 s-1",
+        "src_units": "kg m-2 s-1",
+        "src_var": "rainf",
+        "src_folder": "rainf"
+    }
+  }
+

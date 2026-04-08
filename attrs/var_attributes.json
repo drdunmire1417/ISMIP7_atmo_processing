@@ -19,6 +19,11 @@
     "standard_name": "snowfall_flux",
     "long_name": "snowfall"
   },
+  "rainf": {
+    "units": "kg m-2 s-1",
+    "standard_name": "rainfall_flux",
+    "long_name": "rainfall"
+  },
   "snm": {
     "units": "kg m-2 s-1",
     "standard_name": "surface_snow_melt_flux",
