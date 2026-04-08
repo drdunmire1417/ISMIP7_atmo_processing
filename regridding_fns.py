@@ -48,11 +48,11 @@ def create_target_grid(icesheet, res):
 
     return ds_target2  
 
-def fill_nearest_2d_only(ds, var, mask_file , mask_temp = False):
+def fill_nearest_2d_only(ds, var, mask_file):
     if os.path.exists(mask_file):
         mask = xr.open_dataset(mask_file)
         da = ds[var].where(mask.mask.values != 0)
-        if mask_temp: da = da.where((da>220)&(da<285))
+        #if mask_temp: da = da.where((da>220)&(da<285))
         data = da.values
         
         # Loop through each time step (index 0)

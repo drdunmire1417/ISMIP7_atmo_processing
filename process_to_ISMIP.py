@@ -76,10 +76,6 @@ if __name__ == '__main__':
                 last_file = f'{var}_{my_config.icesheet}_{my_config.gcm}_{my_config.scenario}_{my_config.method}_v{my_config.version}_2300.nc'
                 if not os.path.exists(out_dir+last_file):
                     copy_last_year(out_dir, var, last_file)
-                    if var == 'tas': 
-                        out_dir = f'{my_config.out_dir}{my_config.icesheet}/{my_config.gcm}/{my_config.scenario}/{my_config.method}_processed/tas/v{my_config.version}/'
-                        last_file = f'tas_{my_config.icesheet}_{my_config.gcm}_{my_config.scenario}_{my_config.method}_v{my_config.version}_2300.nc'
-                        copy_last_year(out_dir, 'tas', last_file)
 
             # 3 Compute climatology if scenario = historical
             if my_config.scenario=='historical':
@@ -89,13 +85,6 @@ if __name__ == '__main__':
                 files = clim.get_climatology_files()
                 climatology = clim.compute_climatology(files)
                 clim.save_climatology(climatology)
-
-                if var == 'tas':
-                    clim = Climatology('ts', my_config.icesheet, my_config.gcm, my_config.method, my_config.version, my_config.out_dir)
-                    files = clim.get_climatology_files()
-                    climatology = clim.compute_climatology(files)
-                    clim.save_climatology(climatology)
-
 
             # 4 compute anomalies
             print("\n### -------------- STEP 4 Anomalies -------------- ###\n")
@@ -110,16 +99,16 @@ if __name__ == '__main__':
                 list(executor.map(partial(anom.compute_anomalies_file, clim), files))
             print("Done!")
 
-            if var == 'tas':
-                anom = Anomalies('ts', my_config.icesheet, my_config.gcm, my_config.method, my_config.scenario, my_config.version, my_config.out_dir)
-                clim = anom.get_climatology()
-                files = glob(f'{my_config.out_dir}{my_config.icesheet}/{my_config.gcm}/{my_config.scenario}/{my_config.method}_processed/ts/v{my_config.version}/*.nc')
+            # if var == 'tas':
+            #     anom = Anomalies('ts', my_config.icesheet, my_config.gcm, my_config.method, my_config.scenario, my_config.version, my_config.out_dir)
+            #     clim = anom.get_climatology()
+            #     files = glob(f'{my_config.out_dir}{my_config.icesheet}/{my_config.gcm}/{my_config.scenario}/{my_config.method}_processed/ts/v{my_config.version}/*.nc')
             
-                NUM_WORKERS = my_config.NUM_WORKERS 
-                print(f"Starting parallel anomaly processing on {NUM_WORKERS} cores... ")
-                with ProcessPoolExecutor(max_workers=NUM_WORKERS) as executor:
-                    list(executor.map(partial(anom.compute_anomalies_file, clim), files))
-            print("Done!")
+            #     NUM_WORKERS = my_config.NUM_WORKERS 
+            #     print(f"Starting parallel anomaly processing on {NUM_WORKERS} cores... ")
+            #     with ProcessPoolExecutor(max_workers=NUM_WORKERS) as executor:
+            #         list(executor.map(partial(anom.compute_anomalies_file, clim), files))
+            # print("Done!")
 
     ## 5 - Regrid gradients
     if my_config.gradients:

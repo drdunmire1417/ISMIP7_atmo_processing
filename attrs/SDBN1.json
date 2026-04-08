@@ -49,6 +49,8 @@
     "ts":{
         "dest_units": "K",
         "src_units": "K",
+        "src_var": "tskincorr",
+        "src_folder": "tskin",
         "grad_file_name": "tskin_reg",
         "grad_var_name": "gradient"
     },
@@ -68,7 +70,13 @@
         "dest_units": "K",
         "src_units": "K",
         "src_var": "gradient",
-        "src_file": "t2n_reg"
+        "src_file": "tskin_reg"
+    },
+    "dtasdz": {
+        "dest_units": "K",
+        "src_units": "K",
+        "src_var": "gradient",
+        "src_file": "t2m_reg"
     }
   }
 

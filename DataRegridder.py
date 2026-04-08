@@ -76,12 +76,10 @@ class DataRegridder:
         if os.path.exists(output_path): print(f'Skipping {output_path}... already exists')
         else:
             ds_src = ds_src[[self.src_var]]
-            if self.dest_var == 'tas': 
-                ds_src = fill_nearest_2d_only(ds_src, self.src_var, self.config.src_mask, mask_temp = True)
+            ds_src = fill_nearest_2d_only(ds_src, self.src_var, self.config.src_mask)
+            if self.dest_var == 'tas' or self.dest_var == 'ts': 
                 ds_out = ds_src.interp_like(self.target_grid, method="linear")
-
             else: 
-                ds_src = fill_nearest_2d_only(ds_src, self.src_var, self.config.src_mask)
                 ds_src_bounded = add_coords(ds_src, self.config.src_epsg)
                 if self.regridder_obj is None:
                     self.regridder_obj = make_regridder(ds_src_bounded, self.target_grid, self.config.regrid_scheme, True, self.config.weights_path, self.periodic)
@@ -95,18 +93,6 @@ class DataRegridder:
             ds_out = update_attributes(ds_out, self.dest_var)
             ds_out.attrs.update({'title':f'{self.dest_var} regridded onto ISMIP grid'})
             save_netdf(ds_out, output_path)
-            
-            if self.dest_var == 'tas':
-                ds_ts = ds_out.copy()
-                ds_ts['tas'] = ds_out['tas'].where(ds_out['tas'] < 273.15, 273.15)
-                ds_ts = mask_output(ds_ts, self.config.masks_path).fillna(self.FILL_VALUE)
-                ds_ts = ds_ts.rename({'tas':'ts'})
-                ds_ts = update_attributes(ds_ts, 'ts')
-                out_file_ts = f'ts_{self.config.icesheet}_{self.config.gcm}_{self.config.scenario}_{self.config.method}_v{self.config.version}_{year}.nc'
-                out_dir_ts = self.out_dir.replace("/tas/", "/ts/")
-                os.makedirs(out_dir_ts, exist_ok=True)
-                output_path_ts = os.path.join(out_dir_ts, out_file_ts)
-                save_netdf(ds_ts, output_path_ts, fix_time = False)
 
     def compute_weights(self, source_file):
         if source_file.endswith('.gz'):
