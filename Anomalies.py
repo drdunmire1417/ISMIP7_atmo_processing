@@ -39,7 +39,7 @@ class Anomalies:
         anomaly = anomaly.rename({self.dest_var:self.anom_var})
         anomaly.attrs.update({'title':f'{self.dest_var} anomaly relative to 1960-1989 climatology'})
 
-        fname = f'{self.anom_var}_{self.icesheet}_{self.gcm}_historical_{self.method}_v{self.version}_{y}.nc'
+        fname = f'{self.anom_var}_{self.icesheet}_{self.gcm}_{self.scenario}_{self.method}_v{self.version}_{y}.nc'
         vars_to_encode = list(anomaly.data_vars) + ['x', 'y', 'time']
         encoding_dict = {var: {'dtype': 'float32', '_FillValue': self.FILL_VALUE, 'missing_value': self.FILL_VALUE} for var in vars_to_encode}
         for coord in ['x', 'y', 'time']:

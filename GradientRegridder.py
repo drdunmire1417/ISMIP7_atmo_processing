@@ -28,9 +28,9 @@ class GradientRegridder:
             self.src_units = j[var]['src_units']
             self.grad_src_var = j[var]['grad_var_name']
             grad_file = j[var]['grad_file_name']
-            try:
-                self.grad_file = glob(f'{self.config.grad_dir}{grad_file}*')[0]
-            except: raise ValueError(f'ERROR: Check gradient folder. No files found for {grad_file}')
+            if len(glob(f'{self.config.grad_dir}{grad_file}*'))>0:
+                self.grad_files = glob(f'{self.config.grad_dir}{grad_file}*')
+            else: raise ValueError(f'ERROR: Check gradient folder. No files found for {grad_file}')
 
         self.out_dir = f'{self.config.out_dir}{self.config.icesheet}/{self.config.gcm}/{self.config.scenario}/{self.config.method}_processed/{self.grad_dest_var}/v{self.config.version}/'        
         os.makedirs(self.out_dir, exist_ok=True)
@@ -38,47 +38,75 @@ class GradientRegridder:
         self.FILL_VALUE = netCDF4.default_fillvals['f4']
 
     def regrid_gradients(self):
-        syear, eyear = find_yearrange_from_filename(self.grad_file)
-        final_out_file = f'{self.grad_dest_var}_{self.config.icesheet}_{self.config.gcm}_{self.config.scenario}_{self.config.method}_v{self.config.version}_{syear}-{eyear}.nc'
-        final_output_path = os.path.join(self.out_dir, final_out_file)
+        for f in self.grad_files:
+            syear, eyear = find_yearrange_from_filename(f)
 
-        if os.path.exists(final_output_path):
-            print(f'Skipping {final_output_path}... already exists')
-            return
-
-        print(f'     Regridding gradient file for {self.grad_dest_var} in 10-year chunks...')
-        
-        ds_full = xr.open_dataset(self.grad_file, decode_times=False)
-        total_years = eyear - syear + 1
-        
-        with tempfile.TemporaryDirectory(dir=self.config.scratch_dir) as tmp_dir:
-            chunk_files = []
+            print(f'     Regridding gradient file for {self.grad_dest_var} in 1-year chunks...')
             
-            for chunk_start in range(syear, eyear + 1, 10):
-                chunk_end = min(chunk_start + 9, eyear)
-                print(f"       Processing chunk: {chunk_start} to {chunk_end}")
-                start_idx = chunk_start - syear
-                end_idx = (chunk_end - syear) + 1
+            ds_full = xr.open_dataset(f, decode_times=False)
+            total_years = eyear - syear + 1
+
+            for year in range(syear, eyear+1, 1):
+                print(f"       Processing Year: {year}")
+                file_name = f'{self.grad_dest_var}_{self.config.icesheet}_{self.config.gcm}_{self.config.scenario}_{self.config.method}_v{self.config.version}_{year}.nc'
+                final_output_path = os.path.join(self.out_dir, file_name)
+
+                if os.path.exists(final_output_path):
+                    print(f'Skipping {final_output_path}... already exists')
+                    continue
+
+                start_idx = (year - syear)
+                end_idx = start_idx + 1
+                
                 ds_chunk = ds_full.isel(time=slice(start_idx, end_idx))
                 ds_chunk = ds_chunk[[self.grad_src_var]]
+                
                 ds_out = ds_chunk.interp_like(self.target_grid, method="linear")
-                ds_out = add_time_noleap_annual(ds_out, chunk_start, chunk_end)
+                ds_out = add_time_noleap_annual(ds_out, year, year) # Start/End are the same
                 ds_out = configure_variables(ds_out, self.grad_src_var, self.grad_dest_var) 
-                if self.src_units == 'mmwe' and self.dest_units == 'kg m-2 s-1':ds_out = convert_mmwe_flux(ds_out, monthly = False) 
+                
+                if self.src_units == 'mmwe' and self.dest_units == 'kg m-2 s-1':
+                    ds_out = convert_mmwe_flux(ds_out, monthly=False) 
+                    
                 ds_out = ds_out.fillna(self.FILL_VALUE) 
                 ds_out = update_attributes(ds_out, self.grad_dest_var)
                 
-                chunk_path = os.path.join(tmp_dir, f"chunk_{chunk_start}.nc")
-                save_netdf(ds_out, chunk_path)
-                chunk_files.append(chunk_path)
-                ds_out.close()
-                del ds_out
-
-            print(f"     Concatenating {len(chunk_files)} chunks into final file...")
-            with xr.open_mfdataset(chunk_files, combine='nested', concat_dim='time', decode_times=False) as ds_final:
-                save_netdf(ds_final, final_output_path,fix_time = False)
+                save_netdf(ds_out, final_output_path)
             
-        print(f"     Successfully saved: {final_output_path}")
+            # with tempfile.TemporaryDirectory(dir=self.config.scratch_dir) as tmp_dir:
+            #     chunk_files = []
+                
+            #     for chunk_start in range(syear, eyear + 1, 10):
+            #         chunk_end = min(chunk_start + 9, eyear)
+            #         print(f"       Processing chunk: {chunk_start} to {chunk_end}")
+            #         start_idx = chunk_start - syear
+            #         end_idx = (chunk_end - syear) + 1
+            #         ds_chunk = ds_full.isel(time=slice(start_idx, end_idx))
+            #         print('chunk')
+            #         ds_chunk = ds_chunk[[self.grad_src_var]]
+            #         ds_out = ds_chunk.interp_like(self.target_grid, method="linear")
+            #         print('interp')
+            #         ds_out = add_time_noleap_annual(ds_out, chunk_start, chunk_end)
+            #         ds_out = configure_variables(ds_out, self.grad_src_var, self.grad_dest_var) 
+            #         if self.src_units == 'mmwe' and self.dest_units == 'kg m-2 s-1':ds_out = convert_mmwe_flux(ds_out, monthly = False) 
+            #         print('configure')
+            #         ds_out = ds_out.fillna(self.FILL_VALUE) 
+            #         ds_out = update_attributes(ds_out, self.grad_dest_var)
+            #         print('fill')
+                    
+            #         chunk_path = os.path.join(tmp_dir, f"chunk_{chunk_start}.nc")
+            #         print('pre-save')
+            #         save_netdf(ds_out, chunk_path)
+            #         chunk_files.append(chunk_path)
+            #         ds_out.close()
+            #         print('post-save')
+            #         del ds_out
+
+            #     print(f"     Concatenating {len(chunk_files)} chunks into final file...")
+            #     with xr.open_mfdataset(chunk_files, combine='nested', concat_dim='time', decode_times=False) as ds_final:
+            #         save_netdf(ds_final, final_output_path,fix_time = False)
+                
+            # print(f"     Successfully saved: {final_output_path}")
 
 
 
