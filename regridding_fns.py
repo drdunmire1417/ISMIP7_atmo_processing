@@ -121,7 +121,7 @@ def add_time_noleap_annual(ds, syear, eyear):
     ds['time'] = np.array(time_array, dtype=object)
     return ds
 
-def update_attributes(ds, var):
+def update_attributes(ds, var, res):
 
     with open('attrs/var_attributes.json', 'r') as f:
         attr_map = json.load(f)
@@ -144,6 +144,7 @@ def update_attributes(ds, var):
     }
 
     ds.attrs.update({
+        'spatial_resolution': f'{res} m',
         'comment': 'Prepared for ISMIP7 by Devon Dunmire using xesmf ddunmire@buffalo.edu',
         'source': 'SDBN1 - Brice Noel -  bnoel@uliege.be'
     })
@@ -170,12 +171,28 @@ def save_netdf(ds, outpath, fix_time = True):
                 'units': 'days since 1850-01-01 00:00:00',
                 'calendar': 'standard'
             })
+    ds['crs'] = np.array(0, dtype='int32')
+
+    ds['crs'].attrs = {
+        'grid_mapping_name': 'polar_stereographic',
+        'straight_vertical_longitude_from_pole': -45.0,
+        'latitude_of_projection_origin': 90.0,
+        'standard_parallel': 70.0,
+        'false_easting': 0.0,
+        'false_northing': 0.0,
+        'semi_major_axis': 6378137.0,
+        'inverse_flattening': 298.257223563
+    }
+
+    for var in ds.data_vars:
+        ds[var].attrs['grid_mapping'] = 'crs'
 
     vars_to_encode = list(ds.data_vars) + ['x', 'y', 'time']
-    encoding_dict = {var: {'dtype': 'float32', '_FillValue': FILL_VALUE, 'missing_value': FILL_VALUE} for var in vars_to_encode}
+    encoding_dict = {var: {"zlib":True, "complevel":5, 'shuffle':True, 'dtype': 'float32', '_FillValue': FILL_VALUE, 'missing_value': FILL_VALUE} for var in vars_to_encode}
     for coord in ['x', 'y', 'time']:
         if coord in ds.coords:
             encoding_dict[coord] = {'_FillValue': None}
+
     ds.to_netcdf(outpath, encoding=encoding_dict, unlimited_dims=['time'])
 
 def add_coords(ds, epsg_code): 
@@ -224,16 +241,19 @@ def make_regridder(source, target, method, reuse_weights, weights_path, periodic
         periodic = periodic
     )
 
-def copy_last_year(dirr, var, last_file):
+def copy_last_year(dirr, var, last_file, months = True):
     files = []
     for year in np.arange(2290,2300):
         f = glob(f'{dirr}/{var}_*_{year}.nc')[0]
         files.append(f)        
         
     ds = xr.open_mfdataset(files, use_cftime=True)
-    ds = ds.groupby(ds.time.dt.month).mean()
-    ds = ds.rename({'month':'time'})
-    ds['time'] = [cftime.datetime(2300, month, 15) for month in range(1, 13)]
+    if months:
+        ds = ds.groupby(ds.time.dt.month).mean()
+        ds = ds.rename({'month':'time'})
+        ds['time'] = [cftime.datetime(2300, month, 15) for month in range(1, 13)]
+    else:
+        ds['time'] = [cftime.datetime(2300, 12, 31)]
     ds.attrs.update({'comment':'Prepared for ISMIP7 by Devon Dunmire using xesmf ddunmire@buffalo.edu/nYear 2300 computed as average of years 2290-2299'})
     save_netdf(ds, dirr+last_file)
                         

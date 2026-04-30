@@ -69,7 +69,7 @@ class GradientRegridder:
                     ds_out = convert_mmwe_flux(ds_out, monthly=False) 
                     
                 ds_out = ds_out.fillna(self.FILL_VALUE) 
-                ds_out = update_attributes(ds_out, self.grad_dest_var)
+                ds_out = update_attributes(ds_out, self.grad_dest_var, self.config.res)
                 
                 save_netdf(ds_out, final_output_path)
             

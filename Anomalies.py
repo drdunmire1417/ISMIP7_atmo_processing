@@ -35,7 +35,7 @@ class Anomalies:
     def compute_anomalies_file(self, clim, file):
         y = int(file.replace('.nc', '').split('_')[-1])
         ds = xr.open_dataset(file)
-        anomaly = ds - clim[self.dest_var].values
+        anomaly = (ds[self.dest_var] - clim[self.dest_var].values).to_dataset()
         anomaly = anomaly.rename({self.dest_var:self.anom_var})
         anomaly.attrs.update({'title':f'{self.dest_var} anomaly relative to 1960-1989 climatology'})
 

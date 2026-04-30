@@ -7,14 +7,17 @@ import netCDF4
 import warnings
 warnings.filterwarnings("ignore", category=FutureWarning)
 
+FILL_VALUE = netCDF4.default_fillvals['f4']
+
 class Climatology:
-    def __init__(self, var, icesheet, gcm, method, version, out_dir):
+    def __init__(self, var, icesheet, res, gcm, method, version, out_dir):
         """Initialize the regridder with the specific configuration object."""
         self.dest_var = var
         self.icesheet = icesheet
         self.gcm = gcm
         self.method = method
         self.version = version
+        self.resolution = res
 
         self.out_dir = f'{out_dir}{icesheet}/{gcm}/historical/{method}_processed/{var}/v{version}/'
         self.out_dir_clim = f'{out_dir}{icesheet}/{gcm}/historical/{method}_processed/extra/climatology/{var}/v{version}/'  
@@ -38,7 +41,7 @@ class Climatology:
     def compute_climatology(self, files):
         ds = xr.open_mfdataset(files, decode_times = True, use_cftime=True)
         ds = ds.groupby(ds.time.dt.month).mean()
-        ds = update_attributes(ds, self.dest_var)
+        ds = update_attributes(ds, self.dest_var, self.resolution)
         ds.attrs.update({
             'title': f'{self.dest_var} climatology 1960-1989'
         })
@@ -46,9 +49,10 @@ class Climatology:
         return ds
 
     def save_climatology(self, ds):
+        ds = ds.drop_vars(['crs'])
         path = f'{self.out_dir_clim}{self.dest_var}_{self.icesheet}_{self.gcm}_historical_{self.method}_v{self.version}_1960-1989.nc'
         vars_to_encode = list(ds.data_vars) + ['x', 'y', 'month']
-        encoding_dict = {var: {'dtype': 'float32', '_FillValue': self.FILL_VALUE, 'missing_value': self.FILL_VALUE} for var in vars_to_encode}
+        encoding_dict = {var: {"zlib":True, "complevel":5, 'shuffle':True, 'dtype': 'float32', '_FillValue': FILL_VALUE, 'missing_value': FILL_VALUE} for var in vars_to_encode}
         for coord in ['x', 'y', 'month']:
             if coord in ds.coords:
                 encoding_dict[coord] = {'_FillValue': None}

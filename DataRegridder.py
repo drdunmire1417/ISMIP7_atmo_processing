@@ -90,7 +90,7 @@ class DataRegridder:
             ds_out = configure_variables(ds_out, self.src_var,self.dest_var)
             if self.src_units == 'mmwe' and self.dest_units == 'kg m-2 s-1': ds_out = convert_mmwe_flux(ds_out)
             ds_out = ds_out.fillna(self.FILL_VALUE) 
-            ds_out = update_attributes(ds_out, self.dest_var)
+            ds_out = update_attributes(ds_out, self.dest_var, self.config.res)
             ds_out.attrs.update({'title':f'{self.dest_var} regridded onto ISMIP grid'})
             save_netdf(ds_out, output_path)
 
@@ -174,7 +174,7 @@ class DataRegridder:
                 ds_out = configure_variables(ds_out, self.config.gradient_src_var, grad_var)
                 ds_out = ds_out.fillna(self.FILL_VALUE)  
                 if self.src_units == 'mmwe' and self.dest_units == 'kg m-2 s-1':ds_out = convert_mmwe_flux(ds_out, monthly = False) 
-                ds_out = update_attributes(ds_out, grad_var)
+                ds_out = update_attributes(ds_out, grad_var, self.config.res)
                 
                 chunk_path = os.path.join(tmp_dir, f"chunk_{chunk_start}.nc")
                 save_netdf(ds_out, chunk_path)
@@ -224,7 +224,7 @@ def regrid_CMIP(self):
                 ds_out = configure_variables(ds_out, self.config.gradient_src_var, grad_var)
                 ds_out = ds_out.fillna(self.FILL_VALUE) 
                 if self.src_units == 'mmwe' and self.dest_units == 'kg m-2 s-1':ds_out = convert_mmwe_flux(ds_out, monthly = False) 
-                ds_out = update_attributes(ds_out, grad_var)
+                ds_out = update_attributes(ds_out, grad_var, self.config.res)
                 
                 chunk_path = os.path.join(tmp_dir, f"chunk_{chunk_start}.nc")
                 save_netdf(ds_out, chunk_path)

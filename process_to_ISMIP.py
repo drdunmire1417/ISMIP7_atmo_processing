@@ -81,7 +81,7 @@ if __name__ == '__main__':
             if my_config.scenario=='historical':
                 print("\n### -------------- STEP 3 Climatology -------------- ###\n")
                 print("Computing Climatology ... ")
-                clim = Climatology(var, my_config.icesheet, my_config.gcm, my_config.method, my_config.version, my_config.out_dir)
+                clim = Climatology(var, my_config.icesheet, my_config.res, my_config.gcm, my_config.method, my_config.version, my_config.out_dir)
                 files = clim.get_climatology_files()
                 climatology = clim.compute_climatology(files)
                 clim.save_climatology(climatology)
@@ -107,3 +107,9 @@ if __name__ == '__main__':
             print('Working on variable:', var)
             gradient_regridder = GradientRegridder(my_config,var)
             gradient_regridder.regrid_gradients()
+
+            if my_config.scenario == 'ssp126' or my_config.scenario == 'ssp534-over' or my_config.scenario == 'ssp585':
+                out_dir = f'{my_config.out_dir}{my_config.icesheet}/{my_config.gcm}/{my_config.scenario}/{my_config.method}_processed/{var}/v{my_config.version}/'
+                last_file = f'{var}_{my_config.icesheet}_{my_config.gcm}_{my_config.scenario}_{my_config.method}_v{my_config.version}_2300.nc'
+                if not os.path.exists(out_dir+last_file):
+                    copy_last_year(out_dir, var, last_file)

@@ -5,7 +5,7 @@
 #SBATCH --ntasks=1                 # Request 1 task (the main Python script)
 #SBATCH --cpus-per-task=24            # (MATCH THIS TO NUM_WORKERS!)
 #SBATCH --mem=128G                     
-#SBATCH --time=02:00:00               
+#SBATCH --time=02:10:00               
 #SBATCH --partition=general-compute
 #SBATCH --qos=general-compute
 #SBATCH --cluster=ub-hpc
