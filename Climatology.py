@@ -19,8 +19,8 @@ class Climatology:
         self.version = version
         self.resolution = res
 
-        self.out_dir = f'{out_dir}{icesheet}/{gcm}/historical/{method}_processed/{var}/v{version}/'
-        self.out_dir_clim = f'{out_dir}{icesheet}/{gcm}/historical/{method}_processed/extra/climatology/{var}/v{version}/'  
+        self.out_dir = f'{out_dir}{icesheet}/{gcm}/historical/{method}/{var}/v{version}/'
+        self.out_dir_clim = f'{out_dir}{icesheet}/{gcm}/historical/{method}/extra/climatology/{var}/v{version}/'  
         os.makedirs(self.out_dir_clim, exist_ok=True)
         self.FILL_VALUE = netCDF4.default_fillvals['f4']
 

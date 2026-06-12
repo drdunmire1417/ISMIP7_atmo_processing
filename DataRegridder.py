@@ -28,12 +28,12 @@ class DataRegridder:
             self.src_var = j[var]['src_var']
             self.src_folder = j[var]['src_folder']
 
-        self.out_dir = f'{self.config.out_dir}{self.config.icesheet}/{self.config.gcm}/{self.config.scenario}/{self.config.method}_processed/{self.dest_var}/v{self.config.version}/'        
+        self.out_dir = f'{self.config.out_dir}{self.config.icesheet}/{self.config.gcm}/{self.config.scenario}/{self.config.method}/{self.dest_var}/v{self.config.version}/'        
         os.makedirs(self.out_dir, exist_ok=True)
 
         self.FILL_VALUE = netCDF4.default_fillvals['f4']
 
-    def create_target_grid(self): #TODO - add Greenland
+    def create_target_grid(self):
         """
         Creates the target grid for regridding for AIS or GIS
         """
@@ -66,25 +66,27 @@ class DataRegridder:
             )
             ds_target2 =  add_coords(ds_target, 3413)
 
-
         return ds_target2          
 
     def do_regridding(self, ds_src, filename):
         year = find_year_from_filename(filename)
+        print(filename)
         out_file = f'{self.dest_var}_{self.config.icesheet}_{self.config.gcm}_{self.config.scenario}_{self.config.method}_v{self.config.version}_{year}.nc'
         output_path = os.path.join(self.out_dir, out_file)
         if os.path.exists(output_path): print(f'Skipping {output_path}... already exists')
         else:
             ds_src = ds_src[[self.src_var]]
             ds_src = fill_nearest_2d_only(ds_src, self.src_var, self.config.src_mask)
-            if self.dest_var == 'tas' or self.dest_var == 'ts': 
-                ds_out = ds_src.interp_like(self.target_grid, method="linear")
-            else: 
-                ds_src_bounded = add_coords(ds_src, self.config.src_epsg)
-                if self.regridder_obj is None:
-                    self.regridder_obj = make_regridder(ds_src_bounded, self.target_grid, self.config.regrid_scheme, True, self.config.weights_path, self.periodic)
+            if self.config.regrid:
+                if self.dest_var == 'tas' or self.dest_var == 'ts': 
+                    ds_out = ds_src.interp_like(self.target_grid, method="linear")
+                else: 
+                    ds_src_bounded = add_coords(ds_src, self.config.src_epsg)
+                    if self.regridder_obj is None:
+                        self.regridder_obj = make_regridder(ds_src_bounded, self.target_grid, self.config.regrid_scheme, True, self.config.weights_path, self.periodic)
+                    ds_out = self.regridder_obj(ds_src_bounded, keep_attrs=True)
 
-                ds_out = self.regridder_obj(ds_src_bounded, keep_attrs=True)
+            else: ds_out = ds_src       
             ds_out = mask_output(ds_out, self.config.masks_path)
             ds_out = add_time_noleap(ds_out, year)
             ds_out = configure_variables(ds_out, self.src_var,self.dest_var)

@@ -21,6 +21,18 @@
         "src_units": "kg m-2 s-1",
         "src_var": "pr",
         "src_folder": "pr"
+    },
+    "tas": {
+        "dest_units": "K",
+        "src_units": "K",
+        "src_var": "tas",
+        "src_folder": "tas"
+    },
+    "ts": {
+        "dest_units": "K",
+        "src_units": "K",
+        "src_var": "ts",
+        "src_folder": "ts"
     }
   }
 

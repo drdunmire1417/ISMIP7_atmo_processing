@@ -1,0 +1,82 @@
+
+{
+    "epsg":{
+        "AIS":3031,
+        "GrIS":3413
+    },
+    "acabf": {
+      "dest_units": "kg m-2 s-1",
+      "src_units": "mmwe",
+      "src_var": "smb_rec",
+      "src_folder": "smb_rec",
+      "grad_file_name": "smb_rec_reg",
+      "grad_var_name": "gradient"
+    },
+    "mrro": {
+        "dest_units": "kg m-2 s-1",
+        "src_units": "mmwe",
+        "src_var": "runoffcorr",
+        "src_folder": "runoff",
+        "grad_file_name": "runoff_reg",
+        "grad_var_name": "gradient"
+    },
+    "pr": {
+        "dest_units": "kg m-2 s-1",
+        "src_units": "mmwe",
+        "src_var": "precipcorr",
+        "src_folder": "precip"
+    },
+    "snowf": {
+        "dest_units": "kg m-2 s-1",
+        "src_units": "mmwe",
+        "src_var": "snowfallcorr",
+        "src_folder": "snowfall"
+    },
+    "snm": {
+        "dest_units": "kg m-2 s-1",
+        "src_units": "mmwe",
+        "src_var": "snowmeltcorr",
+        "src_folder": "snowmelt"
+    },
+    "tas": {
+        "dest_units": "K",
+        "src_units": "K",
+        "src_var": "t2mcorr",
+        "src_folder": "t2m",
+        "grad_file_name": "t2m_reg",
+        "grad_var_name": "gradient"
+    },
+    "ts":{
+        "dest_units": "K",
+        "src_units": "K",
+        "src_var": "tskincorr",
+        "src_folder": "tskin",
+        "grad_file_name": "tskin_reg",
+        "grad_var_name": "gradient"
+    },
+    "dacabfdz": {
+        "dest_units": "kg m-2 s-1",
+        "src_units": "mmwe",
+        "src_var": "gradient",
+        "src_file": "smb_rec_reg"
+    },
+    "dmrrodz": {
+        "dest_units": "kg m-2 s-1",
+        "src_units": "mmwe",
+        "src_var": "gradient",
+        "src_file": "runoff_reg"
+    },
+    "dtsdz": {
+        "dest_units": "K",
+        "src_units": "K",
+        "src_var": "gradient",
+        "src_file": "tskin_reg"
+    },
+    "dtasdz": {
+        "dest_units": "K",
+        "src_units": "K",
+        "src_var": "gradient",
+        "src_file": "t2m_reg"
+    }
+  }
+

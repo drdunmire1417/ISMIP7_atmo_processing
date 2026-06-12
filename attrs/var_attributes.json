@@ -55,5 +55,9 @@
   "dtasdz": {
     "units": "K m-1",
     "long_name": "2-m air temperature change with surface elevation"
+  },
+  "orog": {
+    "units": "m",
+    "long_name": "Topography"
   }
 }

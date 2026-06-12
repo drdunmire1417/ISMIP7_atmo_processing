@@ -37,12 +37,12 @@ if __name__ == '__main__':
 
         src_dir = f'{my_config.src_dir}{src_var}/'
         source_files = glob(f'{src_dir}*')
+        print(src_dir)
         _worker_regridder = None
         local_pipeline = DataRegridder(my_config,var)
 
         ## 1 - Compute weights if necessary
-        if my_config.normal: 
-
+        if my_config.regrid:
             if os.path.exists(my_config.weights_path):
                 print("Weights file already exists")
             else:
@@ -56,42 +56,42 @@ if __name__ == '__main__':
                 print("Computing Weights ... ...")
                 local_pipeline.compute_weights(source_file)
 
-            ## 2 - Regrid files in folder
-            print("\n### -------------- STEP 2 Regrid files -------------- ###\n")
-            NUM_WORKERS = my_config.NUM_WORKERS 
+        ## 2 - Regrid or process files in folder
+        print("\n### -------------- STEP 2 Regrid files -------------- ###\n")
+        NUM_WORKERS = my_config.NUM_WORKERS 
 
-            print(f"Starting parallel processing on {NUM_WORKERS} cores... ")
-            with ProcessPoolExecutor(max_workers=NUM_WORKERS, 
-                                    initializer=initialize_worker, 
-                                    initargs=(my_config,var)) as executor:
-                futures = [
-                    executor.submit(wrapper_regrid, file_path)
-                    for file_path in glob(f'{src_dir}*')
-                ]  
-                for future in futures:
-                    print(future.result())     
+        print(f"Starting parallel processing on {NUM_WORKERS} cores... ")
+        with ProcessPoolExecutor(max_workers=NUM_WORKERS, 
+                                initializer=initialize_worker, 
+                                initargs=(my_config,var)) as executor:
+            futures = [
+                executor.submit(wrapper_regrid, file_path)
+                for file_path in glob(f'{src_dir}*')
+            ]  
+            for future in futures:print(future.result())     
 
-            if my_config.scenario == 'ssp126' or my_config.scenario == 'ssp534-over' or my_config.scenario == 'ssp585':
-                out_dir = f'{my_config.out_dir}{my_config.icesheet}/{my_config.gcm}/{my_config.scenario}/{my_config.method}_processed/{var}/v{my_config.version}/'
-                last_file = f'{var}_{my_config.icesheet}_{my_config.gcm}_{my_config.scenario}_{my_config.method}_v{my_config.version}_2300.nc'
-                if not os.path.exists(out_dir+last_file):
-                    copy_last_year(out_dir, var, last_file)
+        if my_config.scenario == 'ssp126' or my_config.scenario == 'ssp534-over' or my_config.scenario == 'ssp585':
+            out_dir = f'{my_config.out_dir}{my_config.icesheet}/{my_config.gcm}/{my_config.scenario}/{my_config.method}/{var}/v{my_config.version}/'
+            last_file = f'{var}_{my_config.icesheet}_{my_config.gcm}_{my_config.scenario}_{my_config.method}_v{my_config.version}_2300.nc'
+            if not os.path.exists(out_dir+last_file):
+                copy_last_year(out_dir, var, last_file)
 
-            # 3 Compute climatology if scenario = historical
-            if my_config.scenario=='historical':
-                print("\n### -------------- STEP 3 Climatology -------------- ###\n")
-                print("Computing Climatology ... ")
-                clim = Climatology(var, my_config.icesheet, my_config.res, my_config.gcm, my_config.method, my_config.version, my_config.out_dir)
-                files = clim.get_climatology_files()
-                climatology = clim.compute_climatology(files)
-                clim.save_climatology(climatology)
+        # 3 Compute climatology if scenario = historical
+        if my_config.scenario=='historical' and my_config.climatology:
+            print("\n### -------------- STEP 3 Climatology -------------- ###\n")
+            print("Computing Climatology ... ")
+            clim = Climatology(var, my_config.icesheet, my_config.res, my_config.gcm, my_config.method, my_config.version, my_config.out_dir)
+            files = clim.get_climatology_files()
+            climatology = clim.compute_climatology(files)
+            clim.save_climatology(climatology)
 
-            # 4 compute anomalies
+        # 4 compute anomalies
+        if my_config.anomalies:
             print("\n### -------------- STEP 4 Anomalies -------------- ###\n")
             print("Computing Anomalies ... ")
             anom = Anomalies(var, my_config.icesheet, my_config.gcm, my_config.method, my_config.scenario, my_config.version, my_config.out_dir)
             clim = anom.get_climatology()
-            files = glob(f'{my_config.out_dir}{my_config.icesheet}/{my_config.gcm}/{my_config.scenario}/{my_config.method}_processed/{var}/v{my_config.version}/*.nc')
+            files = glob(f'{my_config.out_dir}{my_config.icesheet}/{my_config.gcm}/{my_config.scenario}/{my_config.method}/{var}/v{my_config.version}/*.nc')
             
             NUM_WORKERS = my_config.NUM_WORKERS 
             print(f"Starting parallel anomaly processing on {NUM_WORKERS} cores... ")
@@ -108,8 +108,8 @@ if __name__ == '__main__':
             gradient_regridder = GradientRegridder(my_config,var)
             gradient_regridder.regrid_gradients()
 
-            if my_config.scenario == 'ssp126' or my_config.scenario == 'ssp534-over' or my_config.scenario == 'ssp585':
-                out_dir = f'{my_config.out_dir}{my_config.icesheet}/{my_config.gcm}/{my_config.scenario}/{my_config.method}_processed/{var}/v{my_config.version}/'
-                last_file = f'{var}_{my_config.icesheet}_{my_config.gcm}_{my_config.scenario}_{my_config.method}_v{my_config.version}_2300.nc'
-                if not os.path.exists(out_dir+last_file):
-                    copy_last_year(out_dir, var, last_file)
+            # if my_config.scenario == 'ssp126' or my_config.scenario == 'ssp534-over' or my_config.scenario == 'ssp585':
+            #     out_dir = f'{my_config.out_dir}{my_config.icesheet}/{my_config.gcm}/{my_config.scenario}/{my_config.method}/d{var}dz/v{my_config.version}/'
+            #     last_file = f'{var}_{my_config.icesheet}_{my_config.gcm}_{my_config.scenario}_{my_config.method}_v{my_config.version}_2300.nc'
+            #     if not os.path.exists(out_dir+last_file):
+            #         copy_last_year(out_dir, f'd{var}dz', last_file, months = False)

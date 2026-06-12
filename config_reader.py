@@ -28,7 +28,9 @@ class RegridConfig:
     grad_var_list: str
     
     gradients: bool
-    normal: bool
+    regrid: bool
+    climatology: bool
+    anomalies: bool
 
 def read_config_file():
     config = configparser.ConfigParser()
@@ -73,14 +75,16 @@ def read_config_file():
     
 
     #Boolean cases
-    normal = config.getboolean('Cases', 'normal', fallback=True)
+    regrid = config.getboolean('Cases', 'regrid', fallback=True)
     gradients = config.getboolean('Cases', 'gradients', fallback=False)
+    climatology = config.getboolean('Cases', 'climatology', fallback=False)
+    anomalies = config.getboolean('Cases', 'anomalies', fallback=False)
 
     weights_path = f'{weights_dir}{icesheet}_{method}_{res}_weights.nc'
     masks_path = f'{masks_dir}{icesheet}_mask_ISMIP_{res}.nc'
     src_mask = f'{masks_dir}{icesheet}_mask_{method}.nc'
 
-    if not normal: var_list = []
+    #if not normal: var_list = []
     if not gradients: grad_var_list = []
     print('Variables to process:', var_list)
     print('Variables to process gradients:', grad_var_list)
@@ -110,5 +114,7 @@ def read_config_file():
         grad_var_list=grad_var_list,
         
         gradients=gradients,
-        normal=normal,
+        regrid=regrid,
+        climatology=climatology,
+        anomalies=anomalies,
     )

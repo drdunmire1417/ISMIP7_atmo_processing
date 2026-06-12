@@ -16,13 +16,13 @@ class Anomalies:
         self.scenario = scenario
 
         self.out_dir = f'{out_dir}' 
-        self.out_dir_anom = f'{out_dir}{icesheet}/{gcm}/{scenario}/{method}_processed/{var}-anomaly/v{version}/'    
+        self.out_dir_anom = f'{out_dir}{icesheet}/{gcm}/{scenario}/{method}/{var}-anomaly/v{version}/'    
         os.makedirs(self.out_dir_anom, exist_ok=True)
         self.FILL_VALUE = netCDF4.default_fillvals['f4']
 
     def get_climatology(self):
         print('     Getting climatology')
-        folder = f'{self.out_dir}{self.icesheet}/{self.gcm}/historical/{self.method}_processed/extra/climatology/{self.dest_var}/v{self.version}/' 
+        folder = f'{self.out_dir}{self.icesheet}/{self.gcm}/historical/{self.method}/extra/climatology/{self.dest_var}/v{self.version}/' 
         file = f'{self.dest_var}_{self.icesheet}_{self.gcm}_historical_{self.method}_v{self.version}_1960-1989.nc'
         path = os.path.join(folder, file)
         if os.path.exists(path):

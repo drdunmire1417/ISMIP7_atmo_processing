@@ -32,7 +32,7 @@ class GradientRegridder:
                 self.grad_files = glob(f'{self.config.grad_dir}{grad_file}*')
             else: raise ValueError(f'ERROR: Check gradient folder. No files found for {grad_file}')
 
-        self.out_dir = f'{self.config.out_dir}{self.config.icesheet}/{self.config.gcm}/{self.config.scenario}/{self.config.method}_processed/{self.grad_dest_var}/v{self.config.version}/'        
+        self.out_dir = f'{self.config.out_dir}{self.config.icesheet}/{self.config.gcm}/{self.config.scenario}/{self.config.method}/{self.grad_dest_var}/v{self.config.version}/'        
         os.makedirs(self.out_dir, exist_ok=True)
 
         self.FILL_VALUE = netCDF4.default_fillvals['f4']

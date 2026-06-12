@@ -189,7 +189,7 @@ def save_netdf(ds, outpath, fix_time = True):
 
     vars_to_encode = list(ds.data_vars) + ['x', 'y', 'time']
     encoding_dict = {var: {"zlib":True, "complevel":5, 'shuffle':True, 'dtype': 'float32', '_FillValue': FILL_VALUE, 'missing_value': FILL_VALUE} for var in vars_to_encode}
-    for coord in ['x', 'y', 'time']:
+    for coord in ['x', 'y', 'time', 'crs']:
         if coord in ds.coords:
             encoding_dict[coord] = {'_FillValue': None}
 
@@ -242,18 +242,24 @@ def make_regridder(source, target, method, reuse_weights, weights_path, periodic
     )
 
 def copy_last_year(dirr, var, last_file, months = True):
+    print(dirr, var)
     files = []
     for year in np.arange(2290,2300):
         f = glob(f'{dirr}/{var}_*_{year}.nc')[0]
         files.append(f)        
-        
-    ds = xr.open_mfdataset(files, use_cftime=True)
+
+    print(files)   
+    ds = xr.open_mfdataset(files, use_cftime=True, chunks={'time': 1})
     if months:
-        ds = ds.groupby(ds.time.dt.month).mean()
+        ds = ds.groupby(ds.time.dt.month).mean().compute()
         ds = ds.rename({'month':'time'})
         ds['time'] = [cftime.datetime(2300, month, 15) for month in range(1, 13)]
     else:
-        ds['time'] = [cftime.datetime(2300, 12, 31)]
+        ds = ds.mean(dim = 'time').compute()
+        ds = ds.drop_vars('time')
+        new_time = [cftime.datetime(2300, 12, 31)]
+        ds = ds.expand_dims({'time': new_time})
+
     ds.attrs.update({'comment':'Prepared for ISMIP7 by Devon Dunmire using xesmf ddunmire@buffalo.edu/nYear 2300 computed as average of years 2290-2299'})
     save_netdf(ds, dirr+last_file)
                         
