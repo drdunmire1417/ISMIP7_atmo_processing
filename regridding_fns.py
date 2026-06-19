@@ -10,6 +10,7 @@ import json
 import netCDF4
 import os
 from glob import glob
+from datetime import timedelta
 
 FILL_VALUE = netCDF4.default_fillvals['f4']
 
@@ -47,6 +48,21 @@ def create_target_grid(icesheet, res):
         ds_target2 =  add_coords(ds_target, 3413)
 
     return ds_target2  
+
+def month_bounds(times, units='days since 1850-01-01 00:00:00'):
+    starts, ends = [], []
+    for t in times:
+        start = cftime.datetime(t.year, t.month, 1, calendar='standard')
+        if t.month == 12:
+            end = cftime.datetime(t.year + 1, 1, 1, calendar='standard')
+        else:
+            end = cftime.datetime(t.year, t.month + 1, 1, calendar='standard')
+        end = end - timedelta(days=1)
+        starts.append(start)
+        ends.append(end)
+    starts_num = cftime.date2num(starts, units=units, calendar='standard')
+    ends_num   = cftime.date2num(ends,   units=units, calendar='standard')
+    return np.stack([starts_num, ends_num], axis=1)
 
 def fill_nearest_2d_only(ds, var, mask_file):
     if os.path.exists(mask_file):
@@ -159,20 +175,24 @@ def mask_output(ds, mask_file):
         print("please provide mask file for output")
         ValueError(f"ERROR: Could not find {mask_file}")
 
-def save_netdf(ds, outpath, fix_time = True):
+def save_netdf(ds, outpath, fix_time=True):
+    time_units = 'days since 1850-01-01 00:00:00'
+
     if fix_time:
-        day1850 = cftime.datetime(1850,1,1)
+        day1850 = cftime.datetime(1850, 1, 1)
         time_int = [(t - day1850).days for t in ds.time.values]
+        time_bnds_data = month_bounds(ds.time.values)  # compute before overwriting time
         ds['time'] = time_int
         ds.time.attrs.update({
-                'standard_name': 'time',
-                'long_name': 'time',
-                'axis': 'T',
-                'units': 'days since 1850-01-01 00:00:00',
-                'calendar': 'standard'
-            })
-    ds['crs'] = np.array(0, dtype='int32')
+            'standard_name': 'time',
+            'long_name': 'time',
+            'axis': 'T',
+            'units': time_units,
+            'calendar': 'standard',
+            'bounds': 'time_bnds',
+        })
 
+    ds['crs'] = np.array(0, dtype='int32')
     ds['crs'].attrs = {
         'grid_mapping_name': 'polar_stereographic',
         'straight_vertical_longitude_from_pole': -45.0,
@@ -188,12 +208,22 @@ def save_netdf(ds, outpath, fix_time = True):
         ds[var].attrs['grid_mapping'] = 'crs'
 
     vars_to_encode = list(ds.data_vars) + ['x', 'y', 'time']
-    encoding_dict = {var: {"zlib":True, "complevel":5, 'shuffle':True, 'dtype': 'float32', '_FillValue': FILL_VALUE, 'missing_value': FILL_VALUE} for var in vars_to_encode}
+    encoding_dict = {var: {"zlib": True, "complevel": 5, 'shuffle': True, 'dtype': 'float32', '_FillValue': FILL_VALUE, 'missing_value': FILL_VALUE} for var in vars_to_encode}
     for coord in ['x', 'y', 'time', 'crs']:
         if coord in ds.coords:
             encoding_dict[coord] = {'_FillValue': None}
 
     ds.to_netcdf(outpath, encoding=encoding_dict, unlimited_dims=['time'])
+
+    # Append time_bnds using netCDF4 directly
+    with netCDF4.Dataset(outpath, 'a') as nc:
+        if 'nv' not in nc.dimensions:
+            nc.createDimension('nv', 2)
+        tb = nc.createVariable('time_bnds', 'f8', ('time', 'nv'))
+        tb[:] = time_bnds_data
+        tb.units = time_units
+        tb.calendar = 'standard'
+        tb.long_name = 'time bounds'
 
 def add_coords(ds, epsg_code): 
     def create_bounds(x,y,dx,dy):

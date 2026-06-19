@@ -89,12 +89,13 @@ class DataRegridder:
             else: ds_out = ds_src       
             ds_out = mask_output(ds_out, self.config.masks_path)
             ds_out = add_time_noleap(ds_out, year)
-            ds_out = configure_variables(ds_out, self.src_var,self.dest_var)
+            ds_out = configure_variables(ds_out, self.src_var, self.dest_var)
             if self.src_units == 'mmwe' and self.dest_units == 'kg m-2 s-1': ds_out = convert_mmwe_flux(ds_out)
-            ds_out = ds_out.fillna(self.FILL_VALUE) 
+            ds_out = ds_out.fillna(self.FILL_VALUE)
             ds_out = update_attributes(ds_out, self.dest_var, self.config.res)
             ds_out.attrs.update({'title':f'{self.dest_var} regridded onto ISMIP grid'})
             save_netdf(ds_out, output_path)
+
 
     def compute_weights(self, source_file):
         if source_file.endswith('.gz'):

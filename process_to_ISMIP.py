@@ -59,6 +59,7 @@ if __name__ == '__main__':
         ## 2 - Regrid or process files in folder
         print("\n### -------------- STEP 2 Regrid files -------------- ###\n")
         NUM_WORKERS = my_config.NUM_WORKERS 
+        print(glob(f'{src_dir}*'))
 
         print(f"Starting parallel processing on {NUM_WORKERS} cores... ")
         with ProcessPoolExecutor(max_workers=NUM_WORKERS, 

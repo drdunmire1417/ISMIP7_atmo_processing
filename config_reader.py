@@ -82,7 +82,10 @@ def read_config_file():
 
     weights_path = f'{weights_dir}{icesheet}_{method}_{res}_weights.nc'
     masks_path = f'{masks_dir}{icesheet}_mask_ISMIP_{res}.nc'
-    src_mask = f'{masks_dir}{icesheet}_mask_{method}.nc'
+    if scenario == 'OCX':
+        src_mask = f'{masks_dir}{icesheet}_mask_{method}_OCX.nc'
+    else:
+        src_mask = f'{masks_dir}{icesheet}_mask_{method}.nc'
 
     #if not normal: var_list = []
     if not gradients: grad_var_list = []
