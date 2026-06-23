@@ -64,29 +64,6 @@ def month_bounds(times, units='days since 1850-01-01 00:00:00'):
     ends_num   = cftime.date2num(ends,   units=units, calendar='standard')
     return np.stack([starts_num, ends_num], axis=1)
 
-def fill_nearest_2d_only(ds, var, mask_file):
-    if os.path.exists(mask_file):
-        mask = xr.open_dataset(mask_file)
-        da = ds[var].where(mask.mask.values != 0)
-        #if mask_temp: da = da.where((da>220)&(da<285))
-        data = da.values
-        
-        # Loop through each time step (index 0)
-        for t in range(data.shape[0]):
-            slice_2d = data[t, :, :]
-            mask = np.isnan(slice_2d)
-            
-            # Only fill if there are NaNs and at least one valid value
-            if np.any(mask) and not np.all(mask):
-                ind = ndimage.distance_transform_edt(mask, return_indices=True, return_distances=False)
-                data[t, :, :] = slice_2d[tuple(ind)]
-                
-        ds[var] = da.copy(data=data)
-        return ds
-    else: 
-        print("please provide a mask file for the source dataset")
-        raise ValueError(f"ERROR: Could not find {mask_file}")
-
 def configure_variables(ds, old_var, new_var):
     try: 
         for var in ['lat','lon','lat_b','lon_b']:
@@ -167,13 +144,6 @@ def update_attributes(ds, var, res):
     
     return ds
 
-def mask_output(ds, mask_file):
-    if os.path.exists(mask_file):
-        mask = xr.open_dataset(mask_file)
-        return ds.where(mask.mask==1)
-    else: 
-        print("please provide mask file for output")
-        ValueError(f"ERROR: Could not find {mask_file}")
 
 def save_netdf(ds, outpath, fix_time=True):
     time_units = 'days since 1850-01-01 00:00:00'
@@ -292,4 +262,86 @@ def copy_last_year(dirr, var, last_file, months = True):
 
     ds.attrs.update({'comment':'Prepared for ISMIP7 by Devon Dunmire using xesmf ddunmire@buffalo.edu/nYear 2300 computed as average of years 2290-2299'})
     save_netdf(ds, dirr+last_file)
+
+def apply_src_mask(ds, var, mask_file):
+    """
+    Apply the source ice sheet mask to a dataset variable, setting values
+    outside the mask to NaN. Does NOT fill NaNs — they are intentionally
+    left so the conservative regridder can handle them via renormalization.
+    """
+    if os.path.exists(mask_file):
+        mask = xr.open_dataset(mask_file)
+        ds[var] = ds[var].where(mask.mask.values != 0)
+        return ds
+    else:
+        print("please provide a mask file for the source dataset")
+        raise ValueError(f"ERROR: Could not find {mask_file}")
+
+
+def masked_conservative_regrid(regridder, ds, var):
+
+    """
+    Conservative regrid that correctly handles NaN/masked source cells via
+    renormalization. Avoids artifacts at ice sheet edges by never letting
+    off-ice fill values contaminate the area-weighted average.
+
+    Approach: regrid (data * valid) and (valid) separately, then divide.
+    This is equivalent to xesmf's skipna but works on any version.
+    """
+    data = ds[var].values.copy()          # (time, y, x)
+    valid = (~np.isnan(data)).astype(float)
+    data_filled = np.where(np.isnan(data), 0.0, data)
+
+    # Build two temporary datasets for the pair of regrid calls
+    ds_data = ds.copy(deep=True)
+    ds_data[var].values[:] = data_filled
+
+    ds_valid = ds.copy(deep=True)
+    ds_valid[var].values[:] = valid
+
+    ds_out_data = regridder(ds_data, keep_attrs=True)
+    ds_out_valid = regridder(ds_valid, keep_attrs=True)
+
+    weight = ds_out_valid[var].values
+    # Where weight > 0, renormalize; elsewhere leave as NaN
+    result = ds_out_data[var].values / np.where(weight > 0, weight, np.nan)
+
+    ds_out = ds_out_data.copy(deep=True)
+    ds_out[var].values[:] = result
+    return ds_out
+
+
+def fill_nearest_output(ds, var, mask_file):
+    """
+    After regridding, fill any NaN values that fall within the output mask
+    (which includes a small buffer zone beyond the strict ice sheet edge)
+    using nearest-neighbor interpolation. Then apply the output mask so
+    that everything outside the buffer is set to NaN.
+    """
+    if os.path.exists(mask_file):
+        mask_ds = xr.open_dataset(mask_file)
+        output_mask = mask_ds.mask.values  # 1 inside buffer, 0 outside
+
+        data = ds[var].values.copy()  # (time, y, x)
+        for t in range(data.shape[0]):
+            slice_2d = data[t]
+            nan_in_grid = np.isnan(slice_2d)
+
+            # Only bother if there are NaNs inside the output mask
+            fill_region = nan_in_grid & (output_mask == 1)
+            if np.any(fill_region) and not np.all(nan_in_grid):
+                # Find nearest valid neighbor for every NaN cell
+                ind = ndimage.distance_transform_edt(
+                    nan_in_grid, return_distances=False, return_indices=True
+                )
+                filled = slice_2d[tuple(ind)]
+                # Apply fill only inside the output mask buffer
+                data[t] = np.where(fill_region, filled, slice_2d)
+
+        ds[var] = ds[var].copy(data=data)
+        # Apply the output mask — zeros out everything outside the buffer
+        return ds.where(output_mask == 1)
+    else:
+        print("please provide mask file for output")
+        raise ValueError(f"ERROR: Could not find {mask_file}")
                         
